@@ -14,3 +14,18 @@ Make sure you install the dependencies with
 ┬─[william@fillory:~/Dropbox/classwork/2016b/csci3202]
 ╰─>$ pip install -r requirements.txt
 ```
+
+# Homework Writeups
+
+## Homework 1
+
+To test this, run
+
+```bash
+┬─[william@fillory:~/Dropbox/classwork/2016b/csci3202]
+╰─>$ cd ./hw1
+┬─[william@fillory:~/Dropbox/classwork/2016b/csci3202]
+╰─>$ py.test
+```
+
+And again make sure you have python 3.
