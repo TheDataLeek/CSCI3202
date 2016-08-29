@@ -135,6 +135,15 @@ class Graph:
     def __init__(self):
         self.vertices = {}
 
+    def __str__(self):
+        printstr = ''
+        for key, value in self.vertices.items():
+            printstr += (str(key) +
+                ('' if len(value) == 0
+                    else ' -> ({})'.format(', '.join(value))) +
+                '\n')
+        return printstr[:-1]  # remove trailing newline
+
     @property
     def nodes(self):
         return sorted(list(self.vertices.keys()))

@@ -41,6 +41,7 @@ class TestTree(object):
         tree.add(9,7)
         tree.add(1,3)
         tree.add(10,3)
+        assert(str(tree) == '5 -> (6, 4 -> (7 -> (3 -> (1, 10), 9), 8 -> (2)))')
 
     def test_delete(self, tree):
         oldtree = str(tree)
@@ -49,7 +50,9 @@ class TestTree(object):
         oldtree = str(tree)
         tree.delete(1)  # should delete 1 node
         assert(oldtree != str(tree))
+        oldtree = str(tree)
         tree.add(18,3)
+        assert(oldtree != str(tree))
 
 
 class TestGraph(object):
@@ -73,6 +76,7 @@ class TestGraph(object):
         g.addVertex(18)
         g.addVertex(19)
         g.addVertex(100)
+        assert(str(g) == '16\n1\n18\n19\n100\n17\n11\n12\n13\n14\n15')
 
     def test_add_edges(self, g):
         g.addEdge(1,12)
