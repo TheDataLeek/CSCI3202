@@ -1,5 +1,7 @@
 # CSCI 3202 - Introduction to Artificial Intelligence
 
+[![Build Status](https://travis-ci.org/willzfarmer/CSCI3202.svg?branch=master)](https://travis-ci.org/willzfarmer/CSCI3202)
+
 I'm taking this class in fall of 2016, and here I'll put all my related
 classwork and assignments.
 
