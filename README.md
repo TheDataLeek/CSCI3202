@@ -1,7 +1,7 @@
 # CSCI 3202 - Introduction to Artificial Intelligence
 
-[![Build Status](https://travis-ci.org/willzfarmer/CSCI3202.svg?branch=master)](https://travis-ci.org/willzfarmer/CSCI3202)
-[![Coverage Status](https://coveralls.io/repos/github/willzfarmer/CSCI3202/badge.svg?branch=master)](https://coveralls.io/github/willzfarmer/CSCI3202?branch=master)
+[![Build Status](https://travis-ci.org/willzfarmer/CSCI3202.png?branch=master)](https://travis-ci.org/willzfarmer/CSCI3202)
+[![Coverage Status](https://coveralls.io/repos/github/willzfarmer/CSCI3202/badge.png?branch=master)](https://coveralls.io/github/willzfarmer/CSCI3202?branch=master)
 
 I'm taking this class in fall of 2016, and here I'll put all my related
 classwork and assignments.
