@@ -21,6 +21,17 @@ def test_printing():
     assert(str(tree) == '10 -> (1, 2)')
 
 
+def test_stack():
+    stack = will_farmer_hw1.Stack()
+    stack.push(10)
+    stack.push(5)
+    stack.push(1)
+    assert(stack.pop() == 1)
+    assert(stack.checkSize() == 2)
+    assert(stack.pop() == 5)
+    assert(stack.pop() == 10)
+
+
 class TestTree(object):
     """
     Tree Test
