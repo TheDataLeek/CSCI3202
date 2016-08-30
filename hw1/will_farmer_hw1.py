@@ -9,19 +9,19 @@ class Stack(object):
     def __init__(self):
         self.stack = []
 
-    def push(self, number: int) -> None:
+    def push(self, number):
         self.stack.append(number)
 
-    def pop(self) -> int:
+    def pop(self):
         return self.stack.pop()
 
-    def check_size(self) -> int:
+    def check_size(self):
         return len(self.stack)
 
 
 # Problem 2 ###################################################################
 class Node(object):
-    def __init__(self, value: int,
+    def __init__(self, value,
                  left_child=None, right_child=None, parent=None):
         self.value       = value
         self.left_child  = left_child
@@ -33,7 +33,7 @@ class Node(object):
         return [self.left_child, self.right_child]
 
     @property
-    def empty(self) -> bool:
+    def empty(self):
         if self.left_child is None and self.right_child is None:
             return True
         else:
@@ -46,20 +46,20 @@ class Node(object):
                     if not self.empty
                     else ''))
 
-    def getChildren(self) -> List:
+    def getChildren(self):
         """Here for compatibility with bad code"""
         return [self.left_child, self.right_child]
 
 
 # Problem 3 ###################################################################
 class Tree(object):
-    def __init__(self, rootkey: int):
+    def __init__(self, rootkey):
         self.root = Node(rootkey)
 
     def __str__(self):
         return str(self.root)
 
-    def add(self, node_key: int, parent_key: int) -> None:
+    def add(self, node_key, parent_key):
         parent = self.checkTree(parent_key, self.root)
         if parent:
             if parent.left_child is None:
@@ -110,7 +110,7 @@ class Tree(object):
                 if delete_node:
                     return delete_node
 
-    def delete(self, value: int) -> bool:
+    def delete(self, value):
         if self.root is None:
             print('Empty Tree')
         elif value == self.root.value:
@@ -148,21 +148,21 @@ class Graph:
     def nodes(self):
         return sorted(list(self.vertices.keys()))
 
-    def addVertex(self, value: int):
+    def addVertex(self, value):
         #check if value already exists
         if value in self.vertices:
             print("Vertex already exists")
         else:
             self.vertices[value] = []
 
-    def addEdge(self, node1: int, node2: int) -> None:
+    def addEdge(self, node1, node2):
         if node1 not in self.nodes or node2 not in self.nodes:
             print('One or more vertices not found')
         else:
             self.vertices[node1] = sorted([self.vertices[node1] + [node2]])
             self.vertices[node2] = sorted([self.vertices[node2] + [node1]])
 
-    def findVertex(self, value: int) -> List[int]:
+    def findVertex(self, value):
         if value in self.nodes:
             print(self.vertices[value])
         else:
