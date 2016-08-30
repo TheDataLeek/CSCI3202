@@ -13,9 +13,12 @@ class Stack(object):
         self.stack.append(number)
 
     def pop(self):
-        return self.stack.pop()
+        try:
+            return self.stack.pop()
+        except IndexError:
+            return "Stack empty."
 
-    def check_size(self):
+    def checkSize(self):
         return len(self.stack)
 
 
@@ -27,6 +30,15 @@ class Node(object):
         self.left_child  = left_child
         self.right_child = right_child
         self.parent      = parent
+
+    def __getattr__(self, name):
+        """Compatibility for bad names"""
+        if name == 'p':
+            return self.parent
+        elif name == 'l':
+            return self.left_child
+        elif name == 'r':
+            return self.right_child
 
     @property
     def children(self):
@@ -68,8 +80,8 @@ class Tree(object):
                 parent.right_child = Node(node_key, parent=parent)
             else:
                 print('Parent has two children, not added.')
-        else:
-            print('Parent not in tree.')
+        elif parent is None:
+            print('Parent not found.')
 
     def checkTree(self, parentValue, root):
         """
@@ -126,8 +138,24 @@ class Tree(object):
                 delete_node = self.findNodeDelete(value, child)
                 if delete_node:
                     return delete_node
-        print("Parent not found.")
+        # print("Parent not found.")
         return False
+
+    def printTree(self):
+        if self.root != None:
+            print(self.root.value)
+            for child in self.root.getChildren():
+                self.printBranch(child)
+        else:
+            return
+
+    def printBranch(self, root):
+        if root == None:
+            return
+        else:
+            print(root.value)
+            for child in root.getChildren():
+                self.printBranch(child)
 
 
 # Problem 4 ###################################################################
@@ -140,7 +168,7 @@ class Graph:
         for key, value in self.vertices.items():
             printstr += (str(key) +
                 ('' if len(value) == 0
-                    else ' -> ({})'.format(', '.join(value))) +
+                    else ' -> ({})'.format(', '.join([str(c) for c in value]))) +
                 '\n')
         return printstr[:-1]  # remove trailing newline
 
@@ -157,13 +185,15 @@ class Graph:
 
     def addEdge(self, node1, node2):
         if node1 not in self.nodes or node2 not in self.nodes:
-            print('One or more vertices not found')
+            print('One or more vertices not found.')
         else:
-            self.vertices[node1] = sorted([self.vertices[node1] + [node2]])
-            self.vertices[node2] = sorted([self.vertices[node2] + [node1]])
+            self.vertices[node1].append(node2)
+            self.vertices[node1].sort()
+            self.vertices[node2].append(node1)
+            self.vertices[node2].sort()
 
     def findVertex(self, value):
         if value in self.nodes:
             print(self.vertices[value])
         else:
-            print('Node does not exist')
+            print('Not found.')
