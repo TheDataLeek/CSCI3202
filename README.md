@@ -20,9 +20,7 @@ Make sure you install the dependencies with
 
 # Homework Writeups
 
-## Homework 1
-
-To test this, run
+To test the homework, run the tests.
 
 ```bash
 ┬─[william@fillory:~/Dropbox/classwork/2016b/csci3202]
@@ -31,4 +29,6 @@ To test this, run
 ╰─>$ py.test
 ```
 
-And again make sure you have python 3.
+And again make sure you have python 3. Just do it to make the hedgehogs happy.
+
+![png](./hedgehog.png)
