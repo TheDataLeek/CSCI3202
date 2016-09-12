@@ -106,6 +106,8 @@ We then implement A*.
 
 ```python
 def shortest_path_Astar(self, s, e):
+    closed_set = set()
+    open_set = {s}
     q = self.q                                                        # setup queue
     distances = {name: self.inf for name in self.nodes}               # set distances
     previous = {name: None for name in self.nodes}                    # Establish previous: [None, ...]
@@ -118,15 +120,19 @@ def shortest_path_Astar(self, s, e):
         u = q.find_min()[0]                                           # find the smallest weight so far
         if u is None or u == e:                                       # if one doesn't exist, or we're at the end, we're done
             break
+        open_set.discard(u)
+        closed_set.add(u)
         qc = [x[0] for x in q.queue]                                  # everything in queue
         for v in self.graph[u].neighbors:                             # examine neighbors of u
-            if v in qc:                                               # if we haven't looked at this neighbor yet
+            if (v in qc) and (v not in closed_set):                                               # if we haven't looked at this neighbor yet
                 num_evaluated += 1
                 alt = distances[u] + self.graph[u].get_edge_weight(v) # what's its distance?
+                if v not in open_set:
+                    open_set.add(v)
                 if alt < distances[v]:                                # if this distance is smaller than encountered so far
                     distances[v] = alt                                # set to current
                     previous[v] = u
-                    q.adjust(v, distances[v] + (heuristic[e] - heuristic[v]))                                  # adjust minheap
+                    q.adjust(v, distances[v] + self.graph[v].estimate)                                  # adjust minheap
     # Reconstruct shortest path
     if not any([v for k, v in previous.items()]):
         r = []
@@ -140,7 +146,7 @@ def shortest_path_Astar(self, s, e):
             ne = previous[ne]
 
     if len(r) == 1 and r[len(r) - 1] != s:
-        return [], distances[e], previous, distances
+        return [], distances[e], previous, distances, num_evaluated
     return r, distances[e], previous, distances, num_evaluated
 ```
 
