@@ -101,17 +101,23 @@ class TestGraph:
         g.add_edge('D', 'E')
         g.add_edge('E', 'A')
         g.add_edge('F', 'B')
+        g['A'].estimate = 0
+        g['B'].estimate = 2
+        g['C'].estimate = 2
+        g['D'].estimate = 3
+        g['E'].estimate = 4
+        g['F'].estimate = 10
         gx = networkx.DiGraph()
         gx.add_edges_from(g.to_edge_list())
         start = "B"
         end = "C"
-        assert(len(g.shortest_path_dijkstra(start, end)[0]) == len(networkx.shortest_path(gx, start, end)))
+        assert(len(g.shortest_path_dijkstra(start, end)[0]) ==
+                len(g.shortest_path_Astar(start, end)[0]) ==
+                len(networkx.shortest_path(gx, start, end)))
         for i in range(2, 100):
             g1 = Graph()
             g1.generate_erdosrenyi(i)
-            g2 = networkx.DiGraph()
-            g2.add_nodes_from([x[0] for x in g1.graph])
-            g2.add_edges_from(g1.to_edge_list())
+            g2 = g1.to_networkx()
 
             start = chr(96 + random.randint(0, i - 1))
             end = chr(96 + random.randint(0, i - 1))
