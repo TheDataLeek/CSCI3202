@@ -23,9 +23,7 @@ Make sure you install the dependencies with
 To test the homework, run the tests.
 
 ```bash
-┬─[william@fillory:~/Dropbox/classwork/2016b/csci3202]
-╰─>$ cd ./hw1
-┬─[william@fillory:~/Dropbox/classwork/2016b/csci3202]
+┬─[william@fillory:~/csci3202]
 ╰─>$ py.test
 ```
 

@@ -146,7 +146,7 @@ def shortest_path_Astar(self, s, e):
 
 ## Analysis
 
-We note that between Dijkstra and A*, A* was more efficient!
+We note that between Dijkstra and A star, A star was more efficient!
 
 ```
 Dijkstra Algorithm
