@@ -28,8 +28,12 @@ def main():
                     node_data = line.split('=')
                     g[node_data[0]].estimate = float(node_data[1])
     g.plot()
-    print(g.shortest_path_dijkstra('S', 'F'))
-    print(g.shortest_path_Astar('S', 'F'))
+    path, weight, previous, distances, nodes_eval = g.shortest_path_dijkstra('S', 'F')
+    print('Dijkstra Algorithm')
+    print('Path: {}\nwith weight: {}\n{} nodes evaluated'.format(path, weight, nodes_eval))
+    path, weight, previous, distances, nodes_eval = g.shortest_path_Astar('S', 'F')
+    print('A* Search')
+    print('Path: {}\nwith weight: {}\n{} nodes evaluated'.format(path, weight, nodes_eval))
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -127,6 +131,7 @@ class Graph(object):
         plt.figure()
         layout = nx.spectral_layout(g, weight=None, scale=5)
         nx.draw_networkx(g, layout)
+        plt.axis('off')
         plt.savefig('./graph.png')
 
     def add_node(self, name):
@@ -168,6 +173,8 @@ class Graph(object):
         return sorted(edges, key=lambda tup: tup[0])
 
     def shortest_path_Astar(self, s, e):
+        closed_set = set()
+        open_set = {s}
         q = self.q                                                        # setup queue
         distances = {name: self.inf for name in self.nodes}               # set distances
         previous = {name: None for name in self.nodes}                    # Establish previous: [None, ...]
@@ -180,15 +187,19 @@ class Graph(object):
             u = q.find_min()[0]                                           # find the smallest weight so far
             if u is None or u == e:                                       # if one doesn't exist, or we're at the end, we're done
                 break
+            open_set.discard(u)
+            closed_set.add(u)
             qc = [x[0] for x in q.queue]                                  # everything in queue
             for v in self.graph[u].neighbors:                             # examine neighbors of u
-                num_evaluated += 1
-                if v in qc:                                               # if we haven't looked at this neighbor yet
+                if (v in qc) and (v not in closed_set):                                               # if we haven't looked at this neighbor yet
+                    num_evaluated += 1
                     alt = distances[u] + self.graph[u].get_edge_weight(v) # what's its distance?
+                    if v not in open_set:
+                        open_set.add(v)
                     if alt < distances[v]:                                # if this distance is smaller than encountered so far
                         distances[v] = alt                                # set to current
                         previous[v] = u
-                        q.adjust(v, distances[v] + (heuristic[e] - heuristic[v]))                                  # adjust minheap
+                        q.adjust(v, distances[v] + self.graph[v].estimate)                                  # adjust minheap
         # Reconstruct shortest path
         if not any([v for k, v in previous.items()]):
             r = []
@@ -202,7 +213,7 @@ class Graph(object):
                 ne = previous[ne]
 
         if len(r) == 1 and r[len(r) - 1] != s:
-            return [], distances[e], previous, distances
+            return [], distances[e], previous, distances, num_evaluated
         return r, distances[e], previous, distances, num_evaluated
 
     def shortest_path_dijkstra(self, s, e):
@@ -218,8 +229,8 @@ class Graph(object):
                 break
             qc = [x[0] for x in q.queue]                                  # everything in queue
             for v in self.graph[u].neighbors:                             # examine neighbors of u
-                num_evaluated += 1
                 if v in qc:                                               # if we haven't looked at this neighbor yet
+                    num_evaluated += 1
                     alt = distances[u] + self.graph[u].get_edge_weight(v) # what's its distance?
                     if alt < distances[v]:                                # if this distance is smaller than encountered so far
                         distances[v] = alt                                # set to current
