@@ -2,6 +2,7 @@
 
 import sys
 import argparse
+import collections
 import re
 import numpy as np
 import queue
@@ -11,17 +12,19 @@ def main():
     args = get_args()
     system = System(args.filename)
     if args.annealing:
-        simulated_annealing(system)
+        simulated_annealing(system, args.numdistricts)
     elif args.genetic:
-        genetic_algorithm(system)
+        genetic_algorithm(system, args.numdistricts)
 
 
-def simulated_annealing(system):
+def simulated_annealing(system, numdistricts):
     pass
 
 
-def genetic_algorithm(system):
-    pass
+def genetic_algorithm(system, numdistricts):
+    initial = Solution(system, numdistricts)
+    initial.generate_random_solution()
+    initial.value
 
 
 class Solution(object):
@@ -32,28 +35,63 @@ class Solution(object):
             self.numdistricts = system.width + 1
         self.full_mask = np.zeros((system.height, system.width))
 
+    def __getitem__(self, key):
+        if key < 1 or key > self.numdistricts:
+            raise KeyError('District does not exist!')
+        else:
+            new_mask = Mask()
+            new_mask.parse_list(self.get_solution(key))
+            return new_mask
+
+    def __str__(self):
+        return str(self.full_mask)
+
     @property
     def is_valid(self):
         """
         A valid solution is one that covers everything
         """
-        return (self.full_mask == 1).all()
+        valid = True
+        if (self.full_mask == 0).any():
+            valid = False
+            return valid
+        for i in range(1, self.numdistricts + 1):
+            valid &= self[i].is_valid
+        return valid
+
+    @property
+    def value(self):
+        value = 0
+        if not self.is_valid:
+            return value
+        for i in range(1, self.numdistricts + 1):
+            values = self.system.matrix[self[i].mask.astype(bool)]
+            print(collections.Counter(values))
+            break
+
+
+    def get_solution(self, i):
+        return (self.full_mask == i).astype(int)
 
     def generate_random_solution(self):
+        """
+        Solutions are not guaranteed to be equal in size, as if one gets boxed
+        off it will stay small...
+        """
         i = 1
         j = 0
         while (self.full_mask == 0).any():
-            print(self.full_mask)
             if j < self.numdistricts:
                 openspots = np.where(self.full_mask == 0)
-                x = np.random.choice(openspots[0])
-                y = np.random.choice(openspots[1])
-                self.full_mask[x, y] = i
+                y = np.random.choice(openspots[0])
+                x = np.random.choice(openspots[1])
+                self.full_mask[y, x] = i
+                assert(self.full_mask.sum() == sum(range(i + 1)))
             else:
                 openspots = np.where(self.full_mask == i)
-                x = np.random.choice(openspots[0])
-                y = np.random.choice(openspots[1])
-                traversed = {(x, y)}
+                y = np.random.choice(openspots[0])
+                x = np.random.choice(openspots[1])
+                traversed = {(y, x)}
                 while True:
                     neighbors = [(y + yi, x + xi)
                                  for xi in range(-1, 2)
@@ -61,20 +99,17 @@ class Solution(object):
                                  if (0 <= y + yi < self.system.height) and
                                     (0 <= x + xi < self.system.width) and
                                     not (x == 0 and y == 0) and
-                                    (x + xi, y + yi) not in traversed and
+                                    (y + yi, x + xi) not in traversed and
                                     self.full_mask[y + yi, x + xi] in [i, 0]]
-                    print(y, x)
-                    print(neighbors)
                     if len(neighbors) == 0:
                         break
                     for ii, jj in neighbors:
-                        traversed.add((jj, ii))
+                        traversed.add((ii, jj))
                         if self.full_mask[ii, jj] == 0:
                             self.full_mask[ii, jj] = i
                             break
             i = (i % self.numdistricts) + 1
             j += 1
-        print(self.full_mask)
 
 
 class System(object):
@@ -87,6 +122,14 @@ class System(object):
         self.names = dict()
         self.num_names = 0
         self._read_file()
+
+    @property
+    def width(self):
+        return self.matrix.shape[1]
+
+    @property
+    def height(self):
+        return self.matrix.shape[0]
 
     def _read_file(self):
         """
@@ -156,8 +199,6 @@ class Mask(object):
                                      if (0 <= y0 + y < self.height) and
                                         (0 <= x0 + x < self.width) and
                                         not (x == 0 and y == 0)]
-                        print(y0, x0)
-                        print(neighbors)
                         for ii, jj in neighbors:
                             if unlabelled(ii, jj):
                                 labels[ii, jj] = curlab
