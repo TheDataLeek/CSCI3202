@@ -23,12 +23,38 @@ def main():
         genetic_algorithm(system, args.numdistricts)
 
 
+def animate_history(systemdata, history, filename):
+    print('Saving to File')
+    fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
+    axarr[0].imshow(systemdata, interpolation='nearest')
+    sol = axarr[1].imshow(history[0].full_mask, interpolation='nearest')
+    axarr[1].set_title('value {}'.format(history[0].value))
+    plt.axis('off')
+
+    def update_plot(i):
+        sol.set_data(history[i].full_mask)
+        axarr[1].set_title('value {}'.format(history[i].value))
+        plt.suptitle('Solution {}'.format(i))
+        return sol,
+
+    interval = int(60000.0 / len(history))
+    if interval == 0:
+        interval = 1
+    ani = animation.FuncAnimation(fig, update_plot, len(history),
+                                  interval=interval, blit=True)
+    filename = 'simulated_annealing_solution_{}'.format(filename.split('.')[0])
+    ani.save(filename + '.mp4')
+
+    editor.VideoFileClip(filename + '.mp4')\
+            .write_gif(filename + '.gif')
+
+
 def simulated_annealing(system, numdistricts, animate):
     solution = Solution(system, numdistricts)
     solution.generate_random_solution()
     history = [solution]
     k = 0.5
-    Tvals = np.arange(1, 1e-12, -0.0001)
+    Tvals = np.arange(1, 1e-12, -0.001)
     for i, T in tqdm(enumerate(Tvals), total=len(Tvals)):
         new_solution = solution.copy()
         new_solution.mutate()
@@ -42,26 +68,7 @@ def simulated_annealing(system, numdistricts, animate):
     print(solution.value)
 
     if animate:
-        print('Saving to File')
-        fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
-        axarr[0].imshow(system.matrix, interpolation='nearest')
-        sol = axarr[1].imshow(history[0].full_mask, interpolation='nearest')
-        axarr[1].set_title('value {}'.format(history[0].value))
-        plt.axis('off')
-
-        def update_plot(i):
-            sol.set_data(history[i].full_mask)
-            axarr[1].set_title('value {}'.format(history[i].value))
-            plt.suptitle('Solution {}'.format(i))
-            return sol,
-
-        ani = animation.FuncAnimation(fig, update_plot, len(history),
-                                      interval=100, blit=True)
-        filename = 'simulated_annealing_solution_{}'.format(system.filename.split('.')[0])
-        ani.save(filename + '.mp4')
-
-        editor.VideoFileClip(filename + '.mp4')\
-                .write_gif(filename + '.gif')
+        animate_history(system.matrix, history, system.filename)
 
 
 def genetic_algorithm(system, numdistricts):
