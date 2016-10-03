@@ -2,6 +2,7 @@
 
 import willfarmer_hw5
 import pytest
+import numpy as np
 
 
 class TestMask(object):
@@ -63,6 +64,43 @@ class TestSolution(object):
     def test_random(self, solution):
         solution.generate_random_solution()
         assert solution.is_valid is True
+
+    def test_copy(self, solution):
+        copy = solution.copy()
+        assert (copy.full_mask == solution.full_mask).all()
+        copy.full_mask[0, 0] = 999
+        assert copy.full_mask[0, 0] != solution.full_mask[0, 0]
+
+    def test_valid(self, solution):
+        solution.full_mask[:] = 1
+        assert solution.is_valid
+        solution.full_mask[1, 1] = 0
+        assert not solution.is_valid
+
+    def test_value(self, solution):
+        solution.full_mask[:] = 1
+        solution.full_mask[1, 1] = 0
+        assert solution.value == 0
+
+    def test_openspots(self, solution):
+        for _ in range(100):
+            y, x = solution.get_openspots(0)
+            assert 0 <= y < len(solution.full_mask)
+            assert 0 <= x < len(solution.full_mask[0])
+        assert not any(solution.get_openspots(5))
+        solution.full_mask[0, 0] = 1
+        for _ in range(10):
+            y, x = solution.get_openspots(1)
+            assert y == 0
+            assert x == 0
+
+    def test_mutate(self, solution):
+        solution.generate_random_solution()
+        copy = solution.copy()
+        solution.mutate()
+        assert len(np.where((copy.full_mask - solution.full_mask) != 0)[0]) == 1
+
+
 
 class PseudoSystem(object):
     def __init__(self, width=8, height=8):
