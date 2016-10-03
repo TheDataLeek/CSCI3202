@@ -2,24 +2,66 @@
 
 import sys
 import argparse
+import math
+import random
 import re
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn
+import matplotlib.animation as animation
+import moviepy
+from moviepy import editor
 import queue
+from tqdm import tqdm
 
 
 def main():
     args = get_args()
     system = System(args.filename)
     if args.annealing:
-        simulated_annealing(system, args.numdistricts)
+        simulated_annealing(system, args.numdistricts, args.animate)
     elif args.genetic:
         genetic_algorithm(system, args.numdistricts)
 
 
-def simulated_annealing(system, numdistricts):
-    pass
+def simulated_annealing(system, numdistricts, animate):
+    solution = Solution(system, numdistricts)
+    solution.generate_random_solution()
+    history = [solution]
+    k = 0.5
+    Tvals = np.arange(1, 1e-12, -0.0001)
+    for i, T in tqdm(enumerate(Tvals), total=len(Tvals)):
+        new_solution = solution.copy()
+        new_solution.mutate()
+        dv = new_solution.value - solution.value
+        if (dv > 0 or
+                random.random() < math.exp(dv / (k * T))):
+            solution = new_solution
+            history.append(new_solution)
+
+    print(solution)
+    print(solution.value)
+
+    if animate:
+        print('Saving to File')
+        fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
+        axarr[0].imshow(system.matrix, interpolation='nearest')
+        sol = axarr[1].imshow(history[0].full_mask, interpolation='nearest')
+        axarr[1].set_title('value {}'.format(history[0].value))
+        plt.axis('off')
+
+        def update_plot(i):
+            sol.set_data(history[i].full_mask)
+            axarr[1].set_title('value {}'.format(history[i].value))
+            plt.suptitle('Solution {}'.format(i))
+            return sol,
+
+        ani = animation.FuncAnimation(fig, update_plot, len(history),
+                                      interval=100, blit=True)
+        filename = 'simulated_annealing_solution_{}'.format(system.filename.split('.')[0])
+        ani.save(filename + '.mp4')
+
+        editor.VideoFileClip(filename + '.mp4')\
+                .write_gif(filename + '.gif')
 
 
 def genetic_algorithm(system, numdistricts):
@@ -48,6 +90,11 @@ class Solution(object):
 
     def __str__(self):
         return str(self.full_mask)
+
+    def copy(self):
+        new_sol = Solution(self.system, self.numdistricts)
+        new_sol.full_mask = np.copy(self.full_mask)
+        return new_sol
 
     def show(self, save=False, name='out.png'):
         fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
@@ -101,6 +148,8 @@ class Solution(object):
         openspots = np.where(self.full_mask == value)
         if len(openspots[0]) == 1:
             choice = 0
+        elif len(openspots[0]) == 0:
+            return None, None
         else:
             choice = np.random.randint(0, len(openspots[0]) - 1)
         y = openspots[0][choice]
@@ -143,6 +192,8 @@ class Solution(object):
     def mutate(self):
         i = np.random.randint(1, self.numdistricts)
         y, x = self.get_openspots(i)
+        if y is None:
+            raise IndexError('No open spots? Something is real bad')
         traversed = set()
         q = queue.Queue()
         q.put((y, x))
@@ -286,6 +337,8 @@ def get_args():
                         help='Use Genetic Algorithm?')
     parser.add_argument('-n', '--numdistricts', type=int, default=None,
                         help='Number of districts to form.')
+    parser.add_argument('-z', '--animate', action='store_true', default=False,
+                        help='Animate algorithms?')
     args= parser.parse_args()
     args.filename = args.filename[0]
     return args
