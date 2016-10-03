@@ -58,13 +58,13 @@ class TestMask(object):
 class TestSolution(object):
     @pytest.fixture
     def solution(self):
-        return willfarmer_hw5.Solution(PseudoSystem(), numdistricts=3)
+        return willfarmer_hw5.Solution(PseudoSystem(), numdistricts=8)
 
     def test_random(self, solution):
         solution.generate_random_solution()
         assert solution.is_valid is True
 
 class PseudoSystem(object):
-    def __init__(self, width=5, height=5):
+    def __init__(self, width=8, height=8):
         self.width = width
         self.height = height

@@ -2,9 +2,9 @@
 
 import sys
 import argparse
-import collections
 import re
 import numpy as np
+import matplotlib.pyplot as plt
 import queue
 
 
@@ -24,7 +24,14 @@ def simulated_annealing(system, numdistricts):
 def genetic_algorithm(system, numdistricts):
     initial = Solution(system, numdistricts)
     initial.generate_random_solution()
-    initial.value
+
+    fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
+    axarr[0].imshow(system.matrix, interpolation='nearest')
+    axarr[1].imshow(initial.full_mask, interpolation='nearest', alpha=0.5)
+    axarr[1].set_title('Value: {}'.format(initial.value))
+    axarr[0].axis('off')
+    axarr[1].axis('off')
+    plt.show()
 
 
 class Solution(object):
@@ -61,17 +68,36 @@ class Solution(object):
 
     @property
     def value(self):
+        """
+        This is our fitness function.
+
+        We're trying to maximize similarity in districts, as well as make sure
+        that the size of each district is at least 1.
+        """
         value = 0
         if not self.is_valid:
             return value
         for i in range(1, self.numdistricts + 1):
             values = self.system.matrix[self[i].mask.astype(bool)]
-            print(collections.Counter(values))
-            break
-
+            if len(values) == 0:
+                value = 0
+                return value
+            else:
+                value += np.abs(len(values[values == 0]) - len(values[values == 1]))
+        return value
 
     def get_solution(self, i):
         return (self.full_mask == i).astype(int)
+
+    def get_openspots(self, value):
+        openspots = np.where(self.full_mask == value)
+        if len(openspots[0]) == 1:
+            choice = 0
+        else:
+            choice = np.random.randint(0, len(openspots[0]) - 1)
+        y = openspots[0][choice]
+        x = openspots[1][choice]
+        return y, x
 
     def generate_random_solution(self):
         """
@@ -82,15 +108,10 @@ class Solution(object):
         j = 0
         while (self.full_mask == 0).any():
             if j < self.numdistricts:
-                openspots = np.where(self.full_mask == 0)
-                y = np.random.choice(openspots[0])
-                x = np.random.choice(openspots[1])
+                y, x = self.get_openspots(0)
                 self.full_mask[y, x] = i
-                assert(self.full_mask.sum() == sum(range(i + 1)))
             else:
-                openspots = np.where(self.full_mask == i)
-                y = np.random.choice(openspots[0])
-                x = np.random.choice(openspots[1])
+                y, x = self.get_openspots(i)
                 traversed = {(y, x)}
                 while True:
                     neighbors = [(y + yi, x + xi)
@@ -110,6 +131,10 @@ class Solution(object):
                             break
             i = (i % self.numdistricts) + 1
             j += 1
+
+    def mutate(self):
+        i = np.random.randint(1, self.numdistricts)
+        y, x = self.get_openspots(i)
 
 
 class System(object):
