@@ -5,6 +5,7 @@ import argparse
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn
 import queue
 
 
@@ -24,14 +25,9 @@ def simulated_annealing(system, numdistricts):
 def genetic_algorithm(system, numdistricts):
     initial = Solution(system, numdistricts)
     initial.generate_random_solution()
-
-    fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
-    axarr[0].imshow(system.matrix, interpolation='nearest')
-    axarr[1].imshow(initial.full_mask, interpolation='nearest', alpha=0.5)
-    axarr[1].set_title('Value: {}'.format(initial.value))
-    axarr[0].axis('off')
-    axarr[1].axis('off')
-    plt.show()
+    initial.show(save=True, name='out1.png')
+    initial.mutate()
+    initial.show(save=True, name='out2.png')
 
 
 class Solution(object):
@@ -52,6 +48,18 @@ class Solution(object):
 
     def __str__(self):
         return str(self.full_mask)
+
+    def show(self, save=False, name='out.png'):
+        fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
+        axarr[0].imshow(self.system.matrix, interpolation='nearest')
+        axarr[1].imshow(self.full_mask, interpolation='nearest')
+        axarr[1].set_title('Value: {}'.format(self.value))
+        axarr[0].axis('off')
+        axarr[1].axis('off')
+        if save:
+            plt.savefig(name)
+        else:
+            plt.show()
 
     @property
     def is_valid(self):
@@ -135,6 +143,27 @@ class Solution(object):
     def mutate(self):
         i = np.random.randint(1, self.numdistricts)
         y, x = self.get_openspots(i)
+        traversed = set()
+        q = queue.Queue()
+        q.put((y, x))
+        while not q.empty():
+            y, x = q.get()
+            traversed.add((y, x))
+
+            if (self.full_mask[y, x] != i and
+                    self[self.full_mask[y, x]].size > 1):
+                self.full_mask[y, x] = i
+                break
+
+            neighbors = [(y + yi, x + xi)
+                         for xi in range(-1, 2)
+                         for yi in range(-1, 2)
+                         if (0 <= y + yi < self.system.height) and
+                            (0 <= x + xi < self.system.width) and
+                            not (x == 0 and y == 0) and
+                            (y + yi, x + xi) not in traversed]
+            for ii, jj in neighbors:
+                q.put((ii, jj))
 
 
 class System(object):
@@ -200,6 +229,10 @@ class Mask(object):
     def parse_list(self, listvals):
         self.mask = np.array(listvals)
         self.height, self.width = self.mask.shape
+
+    @property
+    def size(self):
+        return self.mask.sum()
 
     @property
     def is_valid(self):
