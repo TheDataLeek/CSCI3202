@@ -100,9 +100,15 @@ class TestSolution(object):
         solution.mutate()
         assert len(np.where((copy.full_mask - solution.full_mask) != 0)[0]) == 1
 
+    def test_combine(self, solution):
+        solution.generate_random_solution()
+        osol = willfarmer_hw5.Solution(PseudoSystem(), numdistricts=8)
+        osol.generate_random_solution()
+        new_sol = solution.combine(osol)
 
 
 class PseudoSystem(object):
     def __init__(self, width=8, height=8):
         self.width = width
         self.height = height
+

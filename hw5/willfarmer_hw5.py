@@ -5,6 +5,7 @@ import argparse
 import math
 import random
 import re
+import itertools
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -18,9 +19,15 @@ def main():
     args = get_args()
     system = System(args.filename)
     if args.annealing:
-        simulated_annealing(system, args.numdistricts, args.animate)
+        simulated_annealing(system, args.numdistricts, args.precision, args.animate)
     elif args.genetic:
-        genetic_algorithm(system, args.numdistricts)
+        genetic_algorithm(system, args.numdistricts, args.precision, args.animate)
+    else:
+        print('Running in Demo Mode!!!')
+        print('First we\'ll use Simulated Annealing')
+        simulated_annealing(system, args.numdistricts, args.precision, False)
+        print('Now we\'ll try the Genetic Algorithm')
+        genetic_algorithm(system, args.numdistricts, args.precision, False)
 
 
 def animate_history(systemdata, history, filename):
@@ -49,34 +56,49 @@ def animate_history(systemdata, history, filename):
             .write_gif(filename + '.gif')
 
 
-def simulated_annealing(system, numdistricts, animate):
+def simulated_annealing(system, numdistricts, precision, animate):
     solution = Solution(system, numdistricts)
     solution.generate_random_solution()
     history = [solution]
     k = 0.5
-    Tvals = np.arange(1, 1e-12, -0.001)
+    Tvals = np.arange(1, 1e-12, -1.0/precision)
     for i, T in tqdm(enumerate(Tvals), total=len(Tvals)):
         new_solution = solution.copy()
         new_solution.mutate()
         dv = new_solution.value - solution.value
-        if (dv > 0 or
-                random.random() < math.exp(dv / (k * T))):
+        if (dv > 0 or random.random() < math.exp(dv / (k * T))):
             solution = new_solution
             history.append(new_solution)
 
+    solution.count = len(Tvals)
+    solution.algo = 'Simulated Annealing'
     print(solution)
-    print(solution.value)
+    print(solution.summary())
 
     if animate:
         animate_history(system.matrix, history, system.filename)
 
 
-def genetic_algorithm(system, numdistricts):
-    initial = Solution(system, numdistricts)
-    initial.generate_random_solution()
-    initial.show(save=True, name='out1.png')
-    initial.mutate()
-    initial.show(save=True, name='out2.png')
+def genetic_algorithm(system, numdistricts, precision, animate):
+    solutions = [Solution(system, numdistricts) for _ in range(3)]
+    for s in solutions:
+        s.generate_random_solution()
+    history = solutions
+    for i in tqdm(range(10)):
+        new_solutions = []
+        for _ in range(10):
+            perms = list(itertools.permutations(solutions))
+            random.shuffle(perms)
+            s1, s2 = perms[0][:2]
+            new_solutions.append(s1.combine(s2))
+        full_solutions = new_solutions + solutions
+        solutions = [_[0] for _ in
+                    sorted([(s, s.value) for s in full_solutions],
+                           key=lambda tup: -tup[1])[:3]]
+        history += solutions
+
+    print(solutions[0])
+    print(solutions[0].value)
 
 
 class Solution(object):
@@ -86,6 +108,8 @@ class Solution(object):
         if numdistricts is None:
             self.numdistricts = system.width + 1
         self.full_mask = np.zeros((system.height, system.width))
+        self.algo = None
+        self.count = 0
 
     def __getitem__(self, key):
         if key < 1 or key > self.numdistricts:
@@ -97,6 +121,49 @@ class Solution(object):
 
     def __str__(self):
         return str(self.full_mask)
+
+    def summary(self):
+        sep = (40 * '-') + '\n'
+        summary_string = ''
+        summary_string += sep
+        total_size, percents = self.system.stats
+        summary_string += 'Total Population Size: {}\n'.format(total_size)
+        summary_string += sep
+        summary_string += 'Party Division in Population\n'
+        for k, v in percents.items():
+            summary_string += '{}: {:05f}\n'.format(k, v)
+        summary_string += sep
+
+        majorities = {k:0 for k in self.system.names.keys()}
+        locations = []
+        for i in range(1, self.numdistricts + 1):
+            majorities[self.system._name_arr[self.majority(i)]] += 1
+            locations.append(self[i].location)
+        summary_string += 'Number of Districts with Majority by Party\n'
+        for k, v in majorities.items():
+            summary_string += '{}: {}\n'.format(k, v)
+        summary_string += sep
+
+        summary_string += 'District Locations (zero-indexed, [y, x])\n'
+        for i, loc in enumerate(locations):
+            loc_string = '\n\t'.join(str(tup) for tup in loc)
+            summary_string += 'District {}:\n\t{}\n'.format(i + 1, loc_string)
+        summary_string += sep
+
+        summary_string += 'Algorithm: {}\n'.format(self.algo)
+        summary_string += sep
+
+        summary_string += 'Valid Solution States Explored: {}\n'.format(self.count)
+        summary_string += sep
+
+        return summary_string[:-1]
+
+    def majority(self, i):
+        district = self.system.matrix[self[i].mask.astype(bool)]
+        if district.sum() > (len(district) / 2.0):
+            return 1
+        else:
+            return 0
 
     def copy(self):
         new_sol = Solution(self.system, self.numdistricts)
@@ -223,6 +290,70 @@ class Solution(object):
             for ii, jj in neighbors:
                 q.put((ii, jj))
 
+    def combine(self, other_solution):
+        """
+        This is the combining function. We have a couple of options here
+
+        1. Naively just mash things together until something looks right
+            * Probably the approach most will use
+        2. Use a procedural method to use elements of the two parents to produce
+        a child
+            * This is more likely to work out, as each individual solution has a
+            much higher chance of success
+            * Markov methods
+            * Waveform collapsing (mmmmm this could be amazing)
+
+        What we're going to do here is basically along the same lines as the
+        "generate random" solution.
+        """
+        new_solution = Solution(self.system, self.numdistricts)
+        initial_spots = [_ for _ in range(1, self.numdistricts + 1)]
+        random.shuffle(initial_spots)
+        districts = list(range(1, self.numdistricts + 1))
+        while (new_solution.full_mask == 0).any():
+            # First set all initial locations for spawns
+            if len(initial_spots) != 0:
+                district = initial_spots.pop()
+                locations = (self[district].location +
+                             other_solution[district].location)
+                y, x = locations[random.randint(0, len(locations) - 1)]
+                while new_solution.full_mask[y, x] != 0:
+                    y, x = locations[random.randint(0, len(locations) - 1)]
+                new_solution.full_mask[y, x] = district
+            # Then we can expand each thing. Note, no new assignment, only
+            # taking parts from parents
+            else:
+                district = np.random.choice(districts)
+                q = queue.Queue()
+                y, x = new_solution.get_openspots(district)
+                q.put((y, x))
+                traversed = set()
+                found = False
+                while not q.empty():
+                    y, x = q.get()
+                    traversed.add((y, x))
+
+                    if new_solution.full_mask[y, x] == 0:
+                        new_solution.full_mask[y, x] = district
+                        found = True
+                        break
+
+                    neighbors = [(y + yi, x + xi)
+                                 for xi in range(-1, 2)
+                                 for yi in range(-1, 2)
+                                 if (0 <= y + yi < self.system.height) and
+                                    (0 <= x + xi < self.system.width) and
+                                    not (x == 0 and y == 0) and
+                                    (y + yi, x + xi) not in traversed]
+                    for ii, jj in neighbors:
+                        q.put((ii, jj))
+                if not found:
+                    districts.remove(district)
+
+        if random.random() < 0.1:
+            new_solution.mutate()
+        return new_solution
+
 
 class System(object):
     """
@@ -235,6 +366,15 @@ class System(object):
         self.num_names = 0
         self._read_file()
 
+    def __getitem__(self, key):
+        if key not in list(self.names.keys()):
+            raise KeyError('{} does not exist'.format(key))
+        raw_spots = np.where(self.matrix == self.names[key])
+        spots = []
+        for i in range(len(raw_spots[0])):
+            spots.append([raw_spots[0][i], raw_spots[1][i]])
+        return spots
+
     @property
     def width(self):
         return self.matrix.shape[1]
@@ -243,11 +383,34 @@ class System(object):
     def height(self):
         return self.matrix.shape[0]
 
+    @property
+    def _name_arr(self):
+        return [_[0] for _ in
+                sorted(self.names.items(),
+                       key=lambda tup: tup[1])]
+
+    @property
+    def stats(self):
+        size = self.width * self.height
+        percents = {}
+        for k in self.names.keys():
+            percents[k] = len(self[k]) / float(size)
+        return size, percents
+
     def _read_file(self):
         """
         We read in the file here. The input file needs to be of a very specific
         format, where there are m rows and n columns, with fields separated by a
         space.
+
+        D R D R D R R R
+        D D R D R R R R
+        D D D R R R R R
+        D D R R R R D R
+        R R D D D R R R
+        R D D D D D R R
+        R R R D D D D D
+        D D D D D D R D
         """
         width = 0
         height = 0
@@ -284,6 +447,9 @@ class Mask(object):
         self.mask = np.zeros((height, width))
         self.width, self.height = width, height
 
+    def __str__(self):
+        return str(self.mask)
+
     def parse_list(self, listvals):
         self.mask = np.array(listvals)
         self.height, self.width = self.mask.shape
@@ -291,6 +457,14 @@ class Mask(object):
     @property
     def size(self):
         return self.mask.sum()
+
+    @property
+    def location(self):
+        raw_spots = np.where(self.mask == 1)
+        spots = []
+        for i in range(len(raw_spots[0])):
+            spots.append([raw_spots[0][i], raw_spots[1][i]])
+        return spots
 
     @property
     def is_valid(self):
@@ -346,6 +520,8 @@ def get_args():
                         help='Number of districts to form.')
     parser.add_argument('-z', '--animate', action='store_true', default=False,
                         help='Animate algorithms?')
+    parser.add_argument('-p', '--precision', type=int, default=1000,
+                        help='Tweak precision, lower is less.')
     args= parser.parse_args()
     args.filename = args.filename[0]
     return args
