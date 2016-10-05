@@ -38,7 +38,15 @@ def main():
 
 
 def generate_report_assets(system, numdistricts, precision, makegif):
-    # First generate random solution
+    # First just plot initial map
+    plt.figure(figsize=(8, 8))
+    plt.imshow(system.matrix, interpolation='nearest',
+                    cmap=plt.get_cmap('cool'))
+    plt.axis('off')
+    plt.title(system.filename)
+    plt.savefig(system.filename.split('.')[0] + '_initial.png')
+
+    # Now generate random solution
     solution = Solution(system, numdistricts)
     solution_history = solution.generate_random_solution(history=True)
     animate_history(system.filename, system.matrix,
@@ -169,14 +177,15 @@ def animate_history(filename, systemdata, history, numdistricts, makegif, algo_n
         editor.VideoFileClip(filename + '.mp4')\
                 .write_gif(filename + '.gif')
 
-    plt.figure(figsize=(8, 8))
-    plt.imshow(history[-1].full_mask, interpolation='nearest',
-                          cmap=plt.get_cmap('gnuplot'),
-                          vmin=0,
-                          vmax=numdistricts)
-    plt.title(history[-1].algo + ' Final Solution')
-    plt.axis('off')
-    plt.savefig(filename + '.png')
+    if history[-1].algo is not None:
+        plt.figure(figsize=(8, 8))
+        plt.imshow(history[-1].full_mask, interpolation='nearest',
+                              cmap=plt.get_cmap('gnuplot'),
+                              vmin=0,
+                              vmax=numdistricts)
+        plt.title(history[-1].algo + ' Final Solution')
+        plt.axis('off')
+        plt.savefig(filename + '.png')
 
 
 class Solution(object):
