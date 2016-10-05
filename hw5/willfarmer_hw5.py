@@ -13,6 +13,7 @@ import moviepy
 from moviepy import editor
 import queue
 from tqdm import tqdm
+import time
 
 
 def main():
@@ -28,32 +29,6 @@ def main():
         simulated_annealing(system, args.numdistricts, args.precision, False)
         print('Now we\'ll try the Genetic Algorithm')
         genetic_algorithm(system, args.numdistricts, args.precision, False)
-
-
-def animate_history(systemdata, history, filename):
-    print('Saving to File')
-    fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
-    axarr[0].imshow(systemdata, interpolation='nearest')
-    sol = axarr[1].imshow(history[0].full_mask, interpolation='nearest')
-    axarr[1].set_title('value {}'.format(history[0].value))
-    plt.axis('off')
-
-    def update_plot(i):
-        sol.set_data(history[i].full_mask)
-        axarr[1].set_title('value {}'.format(history[i].value))
-        plt.suptitle('Solution {}'.format(i))
-        return sol,
-
-    interval = int(60000.0 / len(history))
-    if interval == 0:
-        interval = 1
-    ani = animation.FuncAnimation(fig, update_plot, len(history),
-                                  interval=interval, blit=True)
-    filename = 'simulated_annealing_solution_{}'.format(filename.split('.')[0])
-    ani.save(filename + '.mp4')
-
-    editor.VideoFileClip(filename + '.mp4')\
-            .write_gif(filename + '.gif')
 
 
 def simulated_annealing(system, numdistricts, precision, animate):
@@ -76,29 +51,93 @@ def simulated_annealing(system, numdistricts, precision, animate):
     print(solution.summary())
 
     if animate:
-        animate_history(system.matrix, history, system.filename)
+        print('Saving to File')
+        fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
+        axarr[0].imshow(systemdata, interpolation='nearest')
+        sol = axarr[1].imshow(history[0].full_mask, interpolation='nearest')
+        axarr[1].set_title('value {}'.format(history[0].value))
+        plt.axis('off')
+
+        def update_plot(i):
+            sol.set_data(history[i].full_mask)
+            axarr[1].set_title('value {}'.format(history[i].value))
+            plt.suptitle('Solution {}'.format(i))
+            return sol,
+
+        interval = int(60000.0 / len(history))
+        if interval == 0:
+            interval = 1
+        ani = animation.FuncAnimation(fig, update_plot, len(history),
+                                      interval=interval, blit=True)
+        filename = 'simulated_annealing_solution_{}'.format(filename.split('.')[0])
+        ani.save(filename + '.mp4')
+
+        editor.VideoFileClip(filename + '.mp4')\
+                .write_gif(filename + '.gif')
 
 
 def genetic_algorithm(system, numdistricts, precision, animate):
     solutions = [Solution(system, numdistricts) for _ in range(3)]
     for s in solutions:
         s.generate_random_solution()
-    history = solutions
-    for i in tqdm(range(10)):
+    top3_history = [solutions]
+    children_history = []
+    for i in tqdm(range(precision)):
         new_solutions = []
         for _ in range(10):
-            perms = list(itertools.permutations(solutions))
-            random.shuffle(perms)
-            s1, s2 = perms[0][:2]
+            s1, s2 = np.random.choice(solutions, size=2)
             new_solutions.append(s1.combine(s2))
         full_solutions = new_solutions + solutions
+        children_history.append(new_solutions)
         solutions = [_[0] for _ in
                     sorted([(s, s.value) for s in full_solutions],
                            key=lambda tup: -tup[1])[:3]]
-        history += solutions
+        top3_history.append(solutions)
 
-    print(solutions[0])
-    print(solutions[0].value)
+    solution = solutions[0]
+    solution.count = precision
+    solution.algo = 'Genetic Algorithm'
+    print(solution)
+    print(solution.summary())
+
+    if animate:
+        print('Saving to File')
+
+        fig = plt.figure(figsize=(8, 8))
+        ax1 = plt.subplot2grid((10, 10), (3, 0), colspan=4, rowspan=3)
+        top3_axes = [plt.subplot2grid((10, 10), (2, 4 + i), colspan=3, rowspan=2)
+                     for i in range(0, 5, 2)]
+        children_axes = [plt.subplot2grid((10, 10), (i, 7), colspan=3)
+                         for i in range(10)]
+
+        ax1.imshow(system.matrix, interpolation='nearest')
+
+        top3 = [ax.imshow(top3_history[0][i].full_mask, interpolation='nearest')
+                for i, ax in enumerate(top3_axes)]
+        children = [ax.imshow(children_history[0][i].full_mask, interpolation='nearest')
+                    for i, ax in enumerate(children_axes)]
+
+        # axarr[1].set_title('value {}'.format(history[0].value))
+
+        def update_plot(i):
+            for j, ax in enumerate(top3):
+                ax.set_data(top3_history[i][j].full_mask)
+            for j, ax in enumerate(children):
+                ax.set_data(children_history[i][j].full_mask)
+            # axarr[1].set_title('value {}'.format(history[i].value))
+            plt.suptitle('Solution {}'.format(i))
+            return top3[0],
+
+        interval = int(60000.0 / len(top3_history))
+        if interval == 0:
+            interval = 1
+        ani = animation.FuncAnimation(fig, update_plot, len(top3_history),
+                                      interval=interval, blit=True)
+        filename = 'simulated_annealing_solution_{}'.format(system.filename.split('.')[0])
+        ani.save(filename + '.mp4')
+
+        # editor.VideoFileClip(filename + '.mp4')\
+        #         .write_gif(filename + '.gif')
 
 
 class Solution(object):
@@ -285,7 +324,7 @@ class Solution(object):
                          for yi in range(-1, 2)
                          if (0 <= y + yi < self.system.height) and
                             (0 <= x + xi < self.system.width) and
-                            not (x == 0 and y == 0) and
+                            not (xi == 0 and yi == 0) and
                             (y + yi, x + xi) not in traversed]
             for ii, jj in neighbors:
                 q.put((ii, jj))
@@ -310,6 +349,8 @@ class Solution(object):
         initial_spots = [_ for _ in range(1, self.numdistricts + 1)]
         random.shuffle(initial_spots)
         districts = list(range(1, self.numdistricts + 1))
+        i = 1
+        j = 0
         while (new_solution.full_mask == 0).any():
             # First set all initial locations for spawns
             if len(initial_spots) != 0:
@@ -323,32 +364,26 @@ class Solution(object):
             # Then we can expand each thing. Note, no new assignment, only
             # taking parts from parents
             else:
-                district = np.random.choice(districts)
-                q = queue.Queue()
-                y, x = new_solution.get_openspots(district)
-                q.put((y, x))
-                traversed = set()
-                found = False
-                while not q.empty():
-                    y, x = q.get()
-                    traversed.add((y, x))
-
-                    if new_solution.full_mask[y, x] == 0:
-                        new_solution.full_mask[y, x] = district
-                        found = True
-                        break
-
+                y, x = self.get_openspots(i)
+                traversed = {(y, x)}
+                while True:
                     neighbors = [(y + yi, x + xi)
                                  for xi in range(-1, 2)
                                  for yi in range(-1, 2)
                                  if (0 <= y + yi < self.system.height) and
                                     (0 <= x + xi < self.system.width) and
-                                    not (x == 0 and y == 0) and
-                                    (y + yi, x + xi) not in traversed]
+                                    not (xi == 0 and yi == 0) and
+                                    (y + yi, x + xi) not in traversed and
+                                    new_solution.full_mask[y + yi, x + xi] in [i, 0]]
+                    if len(neighbors) == 0:
+                        break
                     for ii, jj in neighbors:
-                        q.put((ii, jj))
-                if not found:
-                    districts.remove(district)
+                        traversed.add((ii, jj))
+                        if new_solution.full_mask[ii, jj] == 0:
+                            new_solution.full_mask[ii, jj] = i
+                            break
+            i = (i % self.numdistricts) + 1
+            j += 1
 
         if random.random() < 0.1:
             new_solution.mutate()
