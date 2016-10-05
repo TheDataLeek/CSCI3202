@@ -21,7 +21,11 @@ FIGSIZE = (4, 4)
 def main():
     args = get_args()
     system = System(args.filename)
-    if args.report:
+    if args.full:
+        generate_report_assets(system, args.numdistricts, 1000, True)
+        simulated_annealing(system, args.numdistricts, 1000, True, True)
+        genetic_algorithm(system, args.numdistricts, 1000, True, True)
+    elif args.report:
         generate_report_assets(system, args.numdistricts, args.precision, args.gif)
     elif args.annealing:
         simulated_annealing(system, args.numdistricts, args.precision,
@@ -303,7 +307,10 @@ class Solution(object):
                 value = 0
                 return value
             else:
-                value += np.abs(len(values[values == 0]) - len(values[values == 1]))
+                subvalue = np.abs(len(values[values == 0]) - len(values[values == 1]))
+                if subvalue < len(values):
+                    subvalue += (len(values) - subvalue) * 0.1
+                value += subvalue
         return value
 
     def get_solution(self, i):
@@ -607,6 +614,8 @@ def get_args():
                         help='Generate Animations for the report')
     parser.add_argument('-j', '--gif', action='store_true', default=False,
                         help='Generate gif versions')
+    parser.add_argument('-F', '--full', action='store_true', default=False,
+                        help='Generate everything')
     args= parser.parse_args()
     args.filename = args.filename[0]
     return args

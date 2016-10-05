@@ -102,14 +102,211 @@ Which can be plotted for readability.
 
 ## Procedure
 
-So in the context of our problem, we can examine how the code actually works
-here.
+So in the context of our problem, we can examine how the code actually works.
+
+### Generating Random Solutions
+
+```python
+class Solution(object):
+
+...
+
+    def fill(self, keep_history=False):
+        districts = list(range(1, self.numdistricts + 1))
+        history = []
+        while (self.full_mask == 0).any():
+            i = districts[random.randint(0, len(districts) - 1)]
+            neighbors = self.get_filtered_district_neighbors(i, [0])
+            if len(neighbors) == 0:
+                districts.remove(i)
+            else:
+                y, x = neighbors[random.randint(0, len(neighbors) - 1)]
+                self.full_mask[y, x] = i
+                if keep_history:
+                    history.append(self.copy())
+        return history
+
+    def generate_random_solution(self, history=False):
+        """
+        Solutions are not guaranteed to be equal in size, as if one gets boxed
+        off it will stay small...
+        """
+        solution_history = [self.copy()]
+        for i in range(1, self.numdistricts + 1):
+            y, x = self.get_openspots(0)
+            self.full_mask[y, x] = i
+            if history:
+                solution_history.append(self.copy())
+        solution_history += self.fill(keep_history=history)
+        if history:
+            return solution_history
+
+...
+```
+
+![gif](./generate_random_solution_smallState.gif)
+
+![gif](./generate_random_solution_largeState.gif)
 
 ### Simulated Annealing
 
+```python
+def simulated_annealing(system, numdistricts, precision, animate, makegif):
+    solution = Solution(system, numdistricts)
+    solution.generate_random_solution()
+    history = [solution]
+    k = 0.8
+    Tvals = np.arange(1, 1e-12, -1.0/precision)
+    for i, T in tqdm(enumerate(Tvals), total=len(Tvals)):
+        new_solution = solution.copy()
+        new_solution.mutate()
+        dv = new_solution.value - solution.value
+        if (dv > 0 or random.random() < math.exp(dv / (k * T))):
+            solution = new_solution
+            history.append(new_solution)
+
+    solution.count = len(Tvals)
+    solution.algo = 'Simulated Annealing'
+    print(solution)
+    print(solution.summary())
+
+    if animate:
+        animate_history(system.filename, system.matrix,
+                        history, solution.numdistricts,
+                        makegif)
+```
+
+#### Mutations
+
+```python
+class Solution(object):
+
+...
+
+    def mutate(self):
+        i = np.random.randint(1, self.numdistricts)
+        y, x = self.get_openspots(i)
+        if y is None:
+            raise IndexError('No open spots? Something is real bad')
+        traversed = set()
+        q = queue.Queue()
+        q.put((y, x))
+        while not q.empty():
+            y, x = q.get()
+            traversed.add((y, x))
+
+            if (self.full_mask[y, x] != i and
+                    self[self.full_mask[y, x]].size > 1):
+                self.full_mask[y, x] = i
+                break
+
+            neighbors = [_ for _ in self.get_neighbors(y, x)
+                         if _ not in traversed]
+            for ii, jj in neighbors:
+                q.put((ii, jj))
+
+...
+```
+
+![png](./mutation.png)
+
 ### Genetic Algorithm
 
+```python
+def genetic_algorithm(system, numdistricts, precision, animate, makegif):
+    solutions = [Solution(system, numdistricts) for _ in range(3)]
+    for s in solutions:
+        s.generate_random_solution()
+    top_history = []
+    for i in tqdm(range(precision)):
+        new_solutions = []
+        for _ in range(10):
+            s1, s2 = np.random.choice(solutions, size=2)
+            new_solutions.append(s1.combine(s2))
+        full_solutions = new_solutions + solutions
+        solutions = [_[0] for _ in
+                    sorted([(s, s.value) for s in full_solutions],
+                           key=lambda tup: -tup[1])[:3]]
+        top_history.append(solutions[0])
+
+    solution = solutions[0]
+    solution.count = precision
+    solution.algo = 'Genetic Algorithm'
+    print(solution)
+    print(solution.summary())
+
+    if animate:
+        animate_history(system.filename, system.matrix,
+                        top_history, solution.numdistricts,
+                        makegif)
+```
+
+#### Combining Solutions
+
+```python
+class Solution(object):
+
+...
+
+    def combine(self, other_solution):
+        new_solution = Solution(self.system, self.numdistricts)
+
+        pick_order = [self, other_solution]
+        random.shuffle(pick_order)
+        cursor = 0
+        for i in range(1, self.numdistricts + 1):
+            parent_locations = pick_order[cursor][i].location
+            open_locations = new_solution.get_full_openspots(0)
+            combined = [(y, x) for y, x in parent_locations
+                        if [y, x] in open_locations]
+            for y, x in combined:
+                new_solution.full_mask[y, x] = i
+            cursor ^= 1
+        for i in range(1, self.numdistricts + 1):
+            y, x = new_solution.get_openspots(i)
+            if y is None:
+                y, x = new_solution.get_openspots(0)
+                new_solution.full_mask[y, x] = i
+        new_solution.fill()
+        if random.random() < 0.1:
+            new_solution.mutate()
+        return new_solution
+```
+
+![png](./combine.png)
+
 ### Fitness Function
+
+```python
+class Solution(object):
+
+...
+
+    @property
+    def value(self):
+        """
+        This is our fitness function.
+
+        We're trying to maximize similarity in districts, as well as make sure
+        that the size of each district is at least 1.
+        """
+        value = 0
+        if not self.is_valid:
+            return value
+        for i in range(1, self.numdistricts + 1):
+            values = self.system.matrix[self[i].mask.astype(bool)]
+            if len(values) == 0:
+                value = 0
+                return value
+            else:
+                subvalue = np.abs(len(values[values == 0]) - len(values[values == 1]))
+                if subvalue < len(values):
+                    subvalue += (len(values) - subvalue) * 0.1
+                value += subvalue
+        return value
+
+...
+```
 
 ### Neighbor Detection
 
