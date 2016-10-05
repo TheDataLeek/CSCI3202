@@ -5,6 +5,20 @@ import pytest
 import numpy as np
 
 
+class TestEndToEnd(object):
+    @pytest.fixture
+    def system(self):
+        return willfarmer_hw5.System('./hw5/smallState.txt')
+
+    def test_simulated_annealing(self, system):
+        willfarmer_hw5.simulated_annealing(system, 8, 10, False, False)
+        willfarmer_hw5.simulated_annealing(system, 4, 10, False, False)
+
+    def test_genetic(self, system):
+        willfarmer_hw5.genetic_algorithm(system, 8, 10, False, False)
+        willfarmer_hw5.genetic_algorithm(system, 4, 10, False, False)
+
+
 class TestSystem(object):
     @pytest.fixture
     def system(self):
@@ -148,6 +162,23 @@ class TestSolution(object):
         solution = willfarmer_hw5.Solution(PseudoSystem(width=3, height=3), 2)
         solution.full_mask = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
         assert len(solution.get_district_neighbors(1)) == 4
+
+        solution = willfarmer_hw5.Solution(PseudoSystem(width=3, height=3), 2)
+        solution.full_mask = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 0]])
+        assert len(solution.get_district_neighbors(1)) == 1
+
+    def test_get_filtered_neighbors(self):
+        solution = willfarmer_hw5.Solution(PseudoSystem(width=3, height=3), 2)
+        solution.full_mask = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 0]])
+        assert len(solution.get_filtered_district_neighbors(1, [0])) == 1
+
+        solution = willfarmer_hw5.Solution(PseudoSystem(width=3, height=3), 2)
+        solution.full_mask = np.array([[1, 1, 1], [1, 1, 1], [2, 1, 0]])
+        assert len(solution.get_filtered_district_neighbors(1, [0])) == 1
+
+        solution = willfarmer_hw5.Solution(PseudoSystem(width=3, height=3), 2)
+        solution.full_mask = np.array([[2, 2, 2], [2, 1, 1], [1, 1, 0]])
+        assert len(solution.get_filtered_district_neighbors(1, [0])) == 1
 
 
 class PseudoSystem(object):

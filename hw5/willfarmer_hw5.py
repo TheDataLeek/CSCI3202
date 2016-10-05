@@ -341,9 +341,9 @@ class Solution(object):
         q.put((y, x))
         edges = []
         labels = np.zeros(self.full_mask.shape)
+        labels[y, x] = 1
         while not q.empty():
             y, x = q.get()
-            labels[y, x] = 1
             if self.full_mask[y, x] == i:
                 for yi, xi in self.get_neighbors(y, x):
                     if labels[yi, xi] == 0:
