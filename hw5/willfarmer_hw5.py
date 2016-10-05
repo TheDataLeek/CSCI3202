@@ -15,6 +15,8 @@ import queue
 from tqdm import tqdm
 import time
 
+FIGSIZE = (4, 4)
+
 
 def main():
     args = get_args()
@@ -39,7 +41,7 @@ def main():
 
 def generate_report_assets(system, numdistricts, precision, makegif):
     # First just plot initial map
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=FIGSIZE)
     plt.imshow(system.matrix, interpolation='nearest',
                     cmap=plt.get_cmap('cool'))
     plt.axis('off')
@@ -54,7 +56,7 @@ def generate_report_assets(system, numdistricts, precision, makegif):
                     algo_name='generate_random')
     # Now show mutation
     backup = solution.copy()
-    fig, axarr = plt.subplots(1, 3, figsize=(8, 8))
+    fig, axarr = plt.subplots(1, 3, figsize=FIGSIZE)
     axarr[0].imshow(solution.full_mask, interpolation='nearest',
                     cmap=plt.get_cmap('gnuplot'))
     axarr[0].axis('off')
@@ -74,7 +76,7 @@ def generate_report_assets(system, numdistricts, precision, makegif):
     # Now show combination
     solution.full_mask[:] = 0
     solution.generate_random_solution()
-    fig, axarr = plt.subplots(1, 3, figsize=(8, 8))
+    fig, axarr = plt.subplots(1, 3, figsize=FIGSIZE)
     axarr[0].imshow(backup.full_mask, interpolation='nearest',
                     cmap=plt.get_cmap('gnuplot'))
     axarr[0].axis('off')
@@ -146,7 +148,7 @@ def genetic_algorithm(system, numdistricts, precision, animate, makegif):
 
 def animate_history(filename, systemdata, history, numdistricts, makegif, algo_name=None):
     print('Saving to File')
-    fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
+    fig, axarr = plt.subplots(1, 2, figsize=FIGSIZE)
     systemplot = axarr[0].imshow(systemdata, interpolation='nearest',
                                  cmap=plt.get_cmap('cool'))
     axarr[0].axis('off')
@@ -178,7 +180,7 @@ def animate_history(filename, systemdata, history, numdistricts, makegif, algo_n
                 .write_gif(filename + '.gif')
 
     if history[-1].algo is not None:
-        plt.figure(figsize=(8, 8))
+        plt.figure(figsize=FIGSIZE)
         plt.imshow(history[-1].full_mask, interpolation='nearest',
                               cmap=plt.get_cmap('gnuplot'),
                               vmin=0,
@@ -260,7 +262,7 @@ class Solution(object):
         return new_sol
 
     def show(self, save=False, name='out.png'):
-        fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
+        fig, axarr = plt.subplots(1, 2, figsize=FIGSIZE)
         axarr[0].imshow(self.system.matrix, interpolation='nearest')
         axarr[1].imshow(self.full_mask, interpolation='nearest')
         axarr[1].set_title('Value: {}'.format(self.value))

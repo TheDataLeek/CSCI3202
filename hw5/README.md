@@ -19,6 +19,16 @@ number back. These functions are usually then maximized.
 
 ## What is Simulated Annealing?
 
+In a nutshell, simulated annealing can be defined as follows.
+
+1. Generate a random solution
+2. Generate a "neighboring solution" to our generated solution
+3. Keep whichever is better, or (with decaying probability) take the new one
+   regardless
+4. Go back to 2
+
+Incomplete python code for this is below.
+
 ```python
 def simulated_annealing(g):
     s, c = generate_solution(g)
@@ -42,6 +52,17 @@ def simulated_annealing(g):
 ```
 
 ## What are Genetic Algorithms?
+
+Genetic algorithms are very similar, and the algorithm can be defined as
+follows.
+
+1. Randomly generate an initial population of solutions
+2. Use our solution population to generate some large number of children (note,
+   these children should inherit properties from their parents)
+3. Keep the best of our total population
+4. Go back to 2
+
+Again, incomplete code is below.
 
 ```python
 for i in range(10):
@@ -79,12 +100,14 @@ Which can be plotted for readability.
 
 ![png](./smallState_initial.png)
 
-## Purpose
-
-We wish to segment the above district (or any like it) into a certain number of
-voting districts. Sounds easy enough.
-
 ## Procedure
+
+So in the context of our problem, we can examine how the code actually works
+here.
+
+### Simulated Annealing
+
+### Genetic Algorithm
 
 ### Fitness Function
 
