@@ -100,9 +100,18 @@ Which can be plotted for readability.
 
 ![png](./smallState_initial.png)
 
+And our other (larger) state looks like the following.
+
+![png](./largeState_initial.png)
+
+This pattern will continue for the rest of the writeup, I'll talk about (and
+show) the smaller version first, and then follow up with the larger version.
+
 ## Procedure
 
 So in the context of our problem, we can examine how the code actually works.
+
+### Helpful Code
 
 ### Generating Random Solutions
 
@@ -176,6 +185,22 @@ def simulated_annealing(system, numdistricts, precision, animate, makegif):
                         makegif)
 ```
 
+The entire process looks like this:
+
+![gif](./simulated_annealing_solution_smallState.gif)
+
+Which has the following final solution.
+
+![png](./simulated_annealing_solution_smallState.png)
+
+And for the large system,
+
+![gif](./simulated_annealing_solution_largeState.gif)
+
+Which has the following final solution.
+
+![png](./simulated_annealing_solution_largeState.png)
+
 #### Mutations
 
 ```python
@@ -240,6 +265,22 @@ def genetic_algorithm(system, numdistricts, precision, animate, makegif):
                         top_history, solution.numdistricts,
                         makegif)
 ```
+
+The entire process looks like this:
+
+![gif](./genetic_algorithm_solution_smallState.gif)
+
+Which has the following final solution.
+
+![png](./genetic_algorithm_solution_smallState.png)
+
+And for the large system,
+
+![gif](./genetic_algorithm_solution_largeState.gif)
+
+Which has the following final solution.
+
+![png](./genetic_algorithm_solution_largeState.png)
 
 #### Combining Solutions
 
@@ -307,11 +348,3 @@ class Solution(object):
 
 ...
 ```
-
-### Neighbor Detection
-
-### Generating New Solutions
-
-## Data
-
-## Results

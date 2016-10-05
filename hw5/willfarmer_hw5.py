@@ -64,17 +64,17 @@ def generate_report_assets(system, numdistricts, precision, makegif):
     axarr[0].imshow(solution.full_mask, interpolation='nearest',
                     cmap=plt.get_cmap('gnuplot'))
     axarr[0].axis('off')
-    axarr[0].set_title('Initial Solution')
+    axarr[0].set_title('Initial')
     solution.mutate()
     axarr[1].imshow(solution.full_mask, interpolation='nearest',
                     cmap=plt.get_cmap('gnuplot'))
     axarr[1].axis('off')
-    axarr[1].set_title('Mutated Solution')
+    axarr[1].set_title('Mutant')
     axarr[2].imshow(np.abs(backup.full_mask - solution.full_mask),
                     interpolation='nearest',
                     cmap=plt.get_cmap('gnuplot'))
     axarr[2].axis('off')
-    axarr[2].set_title('Difference in Solutions')
+    axarr[2].set_title('Difference')
     plt.savefig('mutation.png')
 
     # Now show combination
