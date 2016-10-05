@@ -106,6 +106,19 @@ class TestSolution(object):
         osol.generate_random_solution()
         new_sol = solution.combine(osol)
 
+    def test_district_neighbors(self):
+        solution = willfarmer_hw5.Solution(PseudoSystem(width=3, height=3), 2)
+        solution.full_mask = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 0]])
+        assert len(solution.get_district_neighbors(1)) == 3
+
+        solution = willfarmer_hw5.Solution(PseudoSystem(width=3, height=3), 2)
+        solution.full_mask = np.array([[1, 1, 0], [0, 0, 0], [0, 0, 0]])
+        assert len(solution.get_district_neighbors(1)) == 4
+
+        solution = willfarmer_hw5.Solution(PseudoSystem(width=3, height=3), 2)
+        solution.full_mask = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+        assert len(solution.get_district_neighbors(1)) == 4
+
 
 class PseudoSystem(object):
     def __init__(self, width=8, height=8):

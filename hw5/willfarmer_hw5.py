@@ -19,23 +19,75 @@ import time
 def main():
     args = get_args()
     system = System(args.filename)
-    if args.annealing:
-        simulated_annealing(system, args.numdistricts, args.precision, args.animate)
+    if args.report:
+        generate_report_assets(system, args.numdistricts, args.precision, args.gif)
+    elif args.annealing:
+        simulated_annealing(system, args.numdistricts, args.precision,
+                args.animate, args.gif)
     elif args.genetic:
-        genetic_algorithm(system, args.numdistricts, args.precision, args.animate)
+        genetic_algorithm(system, args.numdistricts, args.precision,
+                args.animate, args.gif)
     else:
         print('Running in Demo Mode!!!')
         print('First we\'ll use Simulated Annealing')
-        simulated_annealing(system, args.numdistricts, args.precision, False)
+        simulated_annealing(system, args.numdistricts, args.precision, False,
+                False)
         print('Now we\'ll try the Genetic Algorithm')
-        genetic_algorithm(system, args.numdistricts, args.precision, False)
+        genetic_algorithm(system, args.numdistricts, args.precision, False,
+                False)
 
 
-def simulated_annealing(system, numdistricts, precision, animate):
+def generate_report_assets(system, numdistricts, precision, makegif):
+    # First generate random solution
+    solution = Solution(system, numdistricts)
+    solution_history = solution.generate_random_solution(history=True)
+    animate_history(system.filename, system.matrix,
+                    solution_history, solution.numdistricts, makegif,
+                    algo_name='generate_random')
+    # Now show mutation
+    backup = solution.copy()
+    fig, axarr = plt.subplots(1, 3, figsize=(8, 8))
+    axarr[0].imshow(solution.full_mask, interpolation='nearest',
+                    cmap=plt.get_cmap('gnuplot'))
+    axarr[0].axis('off')
+    axarr[0].set_title('Initial Solution')
+    solution.mutate()
+    axarr[1].imshow(solution.full_mask, interpolation='nearest',
+                    cmap=plt.get_cmap('gnuplot'))
+    axarr[1].axis('off')
+    axarr[1].set_title('Mutated Solution')
+    axarr[2].imshow(np.abs(backup.full_mask - solution.full_mask),
+                    interpolation='nearest',
+                    cmap=plt.get_cmap('gnuplot'))
+    axarr[2].axis('off')
+    axarr[2].set_title('Difference in Solutions')
+    plt.savefig('mutation.png')
+
+    # Now show combination
+    solution.full_mask[:] = 0
+    solution.generate_random_solution()
+    fig, axarr = plt.subplots(1, 3, figsize=(8, 8))
+    axarr[0].imshow(backup.full_mask, interpolation='nearest',
+                    cmap=plt.get_cmap('gnuplot'))
+    axarr[0].axis('off')
+    axarr[0].set_title('Parent 1')
+    axarr[1].imshow(solution.full_mask, interpolation='nearest',
+                    cmap=plt.get_cmap('gnuplot'))
+    axarr[1].axis('off')
+    axarr[1].set_title('Parent 2')
+    child = backup.combine(solution)
+    axarr[2].imshow(child.full_mask, interpolation='nearest',
+                    cmap=plt.get_cmap('gnuplot'))
+    axarr[2].axis('off')
+    axarr[2].set_title('Child')
+    plt.savefig('combine.png')
+
+
+def simulated_annealing(system, numdistricts, precision, animate, makegif):
     solution = Solution(system, numdistricts)
     solution.generate_random_solution()
     history = [solution]
-    k = 0.5
+    k = 0.8
     Tvals = np.arange(1, 1e-12, -1.0/precision)
     for i, T in tqdm(enumerate(Tvals), total=len(Tvals)):
         new_solution = solution.copy()
@@ -51,48 +103,26 @@ def simulated_annealing(system, numdistricts, precision, animate):
     print(solution.summary())
 
     if animate:
-        print('Saving to File')
-        fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
-        axarr[0].imshow(systemdata, interpolation='nearest')
-        sol = axarr[1].imshow(history[0].full_mask, interpolation='nearest')
-        axarr[1].set_title('value {}'.format(history[0].value))
-        plt.axis('off')
-
-        def update_plot(i):
-            sol.set_data(history[i].full_mask)
-            axarr[1].set_title('value {}'.format(history[i].value))
-            plt.suptitle('Solution {}'.format(i))
-            return sol,
-
-        interval = int(60000.0 / len(history))
-        if interval == 0:
-            interval = 1
-        ani = animation.FuncAnimation(fig, update_plot, len(history),
-                                      interval=interval, blit=True)
-        filename = 'simulated_annealing_solution_{}'.format(filename.split('.')[0])
-        ani.save(filename + '.mp4')
-
-        editor.VideoFileClip(filename + '.mp4')\
-                .write_gif(filename + '.gif')
+        animate_history(system.filename, system.matrix,
+                        history, solution.numdistricts,
+                        makegif)
 
 
-def genetic_algorithm(system, numdistricts, precision, animate):
+def genetic_algorithm(system, numdistricts, precision, animate, makegif):
     solutions = [Solution(system, numdistricts) for _ in range(3)]
     for s in solutions:
         s.generate_random_solution()
-    top3_history = [solutions]
-    children_history = []
+    top_history = []
     for i in tqdm(range(precision)):
         new_solutions = []
         for _ in range(10):
             s1, s2 = np.random.choice(solutions, size=2)
             new_solutions.append(s1.combine(s2))
         full_solutions = new_solutions + solutions
-        children_history.append(new_solutions)
         solutions = [_[0] for _ in
                     sorted([(s, s.value) for s in full_solutions],
                            key=lambda tup: -tup[1])[:3]]
-        top3_history.append(solutions)
+        top_history.append(solutions[0])
 
     solution = solutions[0]
     solution.count = precision
@@ -101,43 +131,52 @@ def genetic_algorithm(system, numdistricts, precision, animate):
     print(solution.summary())
 
     if animate:
-        print('Saving to File')
+        animate_history(system.filename, system.matrix,
+                        top_history, solution.numdistricts,
+                        makegif)
 
-        fig = plt.figure(figsize=(8, 8))
-        ax1 = plt.subplot2grid((10, 10), (3, 0), colspan=4, rowspan=3)
-        top3_axes = [plt.subplot2grid((10, 10), (2, 4 + i), colspan=3, rowspan=2)
-                     for i in range(0, 5, 2)]
-        children_axes = [plt.subplot2grid((10, 10), (i, 7), colspan=3)
-                         for i in range(10)]
 
-        ax1.imshow(system.matrix, interpolation='nearest')
+def animate_history(filename, systemdata, history, numdistricts, makegif, algo_name=None):
+    print('Saving to File')
+    fig, axarr = plt.subplots(1, 2, figsize=(8, 8))
+    systemplot = axarr[0].imshow(systemdata, interpolation='nearest',
+                                 cmap=plt.get_cmap('cool'))
+    axarr[0].axis('off')
+    sol = axarr[1].imshow(history[0].full_mask, interpolation='nearest',
+                          cmap=plt.get_cmap('gnuplot'),
+                          vmin=0,
+                          vmax=numdistricts)
+    axarr[1].set_title('value {}'.format(history[0].value))
+    axarr[1].axis('off')
 
-        top3 = [ax.imshow(top3_history[0][i].full_mask, interpolation='nearest')
-                for i, ax in enumerate(top3_axes)]
-        children = [ax.imshow(children_history[0][i].full_mask, interpolation='nearest')
-                    for i, ax in enumerate(children_axes)]
+    def update_plot(i):
+        sol.set_data(history[i].full_mask)
+        axarr[1].set_title('value {}'.format(history[i].value))
+        plt.suptitle('Solution {}'.format(i))
+        return sol,
 
-        # axarr[1].set_title('value {}'.format(history[0].value))
+    interval = int(60000.0 / len(history))
+    if interval == 0:
+        interval = 1
+    ani = animation.FuncAnimation(fig, update_plot, len(history),
+                                  interval=interval, blit=True)
+    if not algo_name:
+        algo_name = re.sub(' ', '_', history[-1].algo.lower())
+    filename = '{}_solution_{}'.format(algo_name, filename.split('.')[0])
+    ani.save(filename + '.mp4')
 
-        def update_plot(i):
-            for j, ax in enumerate(top3):
-                ax.set_data(top3_history[i][j].full_mask)
-            for j, ax in enumerate(children):
-                ax.set_data(children_history[i][j].full_mask)
-            # axarr[1].set_title('value {}'.format(history[i].value))
-            plt.suptitle('Solution {}'.format(i))
-            return top3[0],
+    if makegif:
+        editor.VideoFileClip(filename + '.mp4')\
+                .write_gif(filename + '.gif')
 
-        interval = int(60000.0 / len(top3_history))
-        if interval == 0:
-            interval = 1
-        ani = animation.FuncAnimation(fig, update_plot, len(top3_history),
-                                      interval=interval, blit=True)
-        filename = 'simulated_annealing_solution_{}'.format(system.filename.split('.')[0])
-        ani.save(filename + '.mp4')
-
-        # editor.VideoFileClip(filename + '.mp4')\
-        #         .write_gif(filename + '.gif')
+    plt.figure(figsize=(8, 8))
+    plt.imshow(history[-1].full_mask, interpolation='nearest',
+                          cmap=plt.get_cmap('gnuplot'),
+                          vmin=0,
+                          vmax=numdistricts)
+    plt.title(history[-1].algo + ' Final Solution')
+    plt.axis('off')
+    plt.savefig(filename + '.png')
 
 
 class Solution(object):
@@ -145,7 +184,7 @@ class Solution(object):
         self.system = system
         self.numdistricts = numdistricts
         if numdistricts is None:
-            self.numdistricts = system.width + 1
+            self.numdistricts = system.width
         self.full_mask = np.zeros((system.height, system.width))
         self.algo = None
         self.count = 0
@@ -164,6 +203,8 @@ class Solution(object):
     def summary(self):
         sep = (40 * '-') + '\n'
         summary_string = ''
+        summary_string += sep
+        summary_string += 'Score: {}\n'.format(self.value)
         summary_string += sep
         total_size, percents = self.system.stats
         summary_string += 'Total Population Size: {}\n'.format(total_size)
@@ -185,8 +226,8 @@ class Solution(object):
 
         summary_string += 'District Locations (zero-indexed, [y, x])\n'
         for i, loc in enumerate(locations):
-            loc_string = '\n\t'.join(str(tup) for tup in loc)
-            summary_string += 'District {}:\n\t{}\n'.format(i + 1, loc_string)
+            loc_string = ','.join(str(tup) for tup in loc)
+            summary_string += 'District {}:{}\n'.format(i + 1, loc_string)
         summary_string += sep
 
         summary_string += 'Algorithm: {}\n'.format(self.algo)
@@ -269,38 +310,73 @@ class Solution(object):
         x = openspots[1][choice]
         return y, x
 
-    def generate_random_solution(self):
+    def get_full_openspots(self, value):
+        openspots = np.where(self.full_mask == value)
+        spots = []
+        for i in range(len(openspots[0])):
+            spots.append([openspots[0][i], openspots[1][i]])
+        return spots
+
+    def get_neighbors(self, y, x):
+        neighbors = [(y + yi, x + xi)
+                     for xi in range(-1, 2)
+                     for yi in range(-1, 2)
+                     if (0 <= y + yi < self.system.height) and
+                        (0 <= x + xi < self.system.width) and
+                        not (xi == 0 and yi == 0)]
+        return neighbors
+
+    def get_district_neighbors(self, i):
+        y, x = self.get_openspots(i)
+        q = queue.Queue()
+        q.put((y, x))
+        edges = []
+        labels = np.zeros(self.full_mask.shape)
+        while not q.empty():
+            y, x = q.get()
+            labels[y, x] = 1
+            if self.full_mask[y, x] == i:
+                for yi, xi in self.get_neighbors(y, x):
+                    if labels[yi, xi] == 0:
+                        q.put((yi, xi))
+                        labels[yi, xi] = 1
+            else:
+                edges.append((y, x))
+        return edges
+
+    def get_filtered_district_neighbors(self, i, filter_list):
+        return [(y, x) for y, x in self.get_district_neighbors(i)
+                if self.full_mask[y, x] in filter_list]
+
+    def fill(self, keep_history=False):
+        districts = list(range(1, self.numdistricts + 1))
+        history = []
+        while (self.full_mask == 0).any():
+            i = districts[random.randint(0, len(districts) - 1)]
+            neighbors = self.get_filtered_district_neighbors(i, [0])
+            if len(neighbors) == 0:
+                districts.remove(i)
+            else:
+                y, x = neighbors[random.randint(0, len(neighbors) - 1)]
+                self.full_mask[y, x] = i
+                if keep_history:
+                    history.append(self.copy())
+        return history
+
+    def generate_random_solution(self, history=False):
         """
         Solutions are not guaranteed to be equal in size, as if one gets boxed
         off it will stay small...
         """
-        i = 1
-        j = 0
-        while (self.full_mask == 0).any():
-            if j < self.numdistricts:
-                y, x = self.get_openspots(0)
-                self.full_mask[y, x] = i
-            else:
-                y, x = self.get_openspots(i)
-                traversed = {(y, x)}
-                while True:
-                    neighbors = [(y + yi, x + xi)
-                                 for xi in range(-1, 2)
-                                 for yi in range(-1, 2)
-                                 if (0 <= y + yi < self.system.height) and
-                                    (0 <= x + xi < self.system.width) and
-                                    not (x == 0 and y == 0) and
-                                    (y + yi, x + xi) not in traversed and
-                                    self.full_mask[y + yi, x + xi] in [i, 0]]
-                    if len(neighbors) == 0:
-                        break
-                    for ii, jj in neighbors:
-                        traversed.add((ii, jj))
-                        if self.full_mask[ii, jj] == 0:
-                            self.full_mask[ii, jj] = i
-                            break
-            i = (i % self.numdistricts) + 1
-            j += 1
+        solution_history = [self.copy()]
+        for i in range(1, self.numdistricts + 1):
+            y, x = self.get_openspots(0)
+            self.full_mask[y, x] = i
+            if history:
+                solution_history.append(self.copy())
+        solution_history += self.fill(keep_history=history)
+        if history:
+            return solution_history
 
     def mutate(self):
         i = np.random.randint(1, self.numdistricts)
@@ -319,72 +395,31 @@ class Solution(object):
                 self.full_mask[y, x] = i
                 break
 
-            neighbors = [(y + yi, x + xi)
-                         for xi in range(-1, 2)
-                         for yi in range(-1, 2)
-                         if (0 <= y + yi < self.system.height) and
-                            (0 <= x + xi < self.system.width) and
-                            not (xi == 0 and yi == 0) and
-                            (y + yi, x + xi) not in traversed]
+            neighbors = [_ for _ in self.get_neighbors(y, x)
+                         if _ not in traversed]
             for ii, jj in neighbors:
                 q.put((ii, jj))
 
     def combine(self, other_solution):
-        """
-        This is the combining function. We have a couple of options here
-
-        1. Naively just mash things together until something looks right
-            * Probably the approach most will use
-        2. Use a procedural method to use elements of the two parents to produce
-        a child
-            * This is more likely to work out, as each individual solution has a
-            much higher chance of success
-            * Markov methods
-            * Waveform collapsing (mmmmm this could be amazing)
-
-        What we're going to do here is basically along the same lines as the
-        "generate random" solution.
-        """
         new_solution = Solution(self.system, self.numdistricts)
-        initial_spots = [_ for _ in range(1, self.numdistricts + 1)]
-        random.shuffle(initial_spots)
-        districts = list(range(1, self.numdistricts + 1))
-        i = 1
-        j = 0
-        while (new_solution.full_mask == 0).any():
-            # First set all initial locations for spawns
-            if len(initial_spots) != 0:
-                district = initial_spots.pop()
-                locations = (self[district].location +
-                             other_solution[district].location)
-                y, x = locations[random.randint(0, len(locations) - 1)]
-                while new_solution.full_mask[y, x] != 0:
-                    y, x = locations[random.randint(0, len(locations) - 1)]
-                new_solution.full_mask[y, x] = district
-            # Then we can expand each thing. Note, no new assignment, only
-            # taking parts from parents
-            else:
-                y, x = self.get_openspots(i)
-                traversed = {(y, x)}
-                while True:
-                    neighbors = [(y + yi, x + xi)
-                                 for xi in range(-1, 2)
-                                 for yi in range(-1, 2)
-                                 if (0 <= y + yi < self.system.height) and
-                                    (0 <= x + xi < self.system.width) and
-                                    not (xi == 0 and yi == 0) and
-                                    (y + yi, x + xi) not in traversed and
-                                    new_solution.full_mask[y + yi, x + xi] in [i, 0]]
-                    if len(neighbors) == 0:
-                        break
-                    for ii, jj in neighbors:
-                        traversed.add((ii, jj))
-                        if new_solution.full_mask[ii, jj] == 0:
-                            new_solution.full_mask[ii, jj] = i
-                            break
-            i = (i % self.numdistricts) + 1
-            j += 1
 
+        pick_order = [self, other_solution]
+        random.shuffle(pick_order)
+        cursor = 0
+        for i in range(1, self.numdistricts + 1):
+            parent_locations = pick_order[cursor][i].location
+            open_locations = new_solution.get_full_openspots(0)
+            combined = [(y, x) for y, x in parent_locations
+                        if [y, x] in open_locations]
+            for y, x in combined:
+                new_solution.full_mask[y, x] = i
+            cursor ^= 1
+        for i in range(1, self.numdistricts + 1):
+            y, x = new_solution.get_openspots(i)
+            if y is None:
+                y, x = new_solution.get_openspots(0)
+                new_solution.full_mask[y, x] = i
+        new_solution.fill()
         if random.random() < 0.1:
             new_solution.mutate()
         return new_solution
@@ -557,6 +592,10 @@ def get_args():
                         help='Animate algorithms?')
     parser.add_argument('-p', '--precision', type=int, default=1000,
                         help='Tweak precision, lower is less.')
+    parser.add_argument('-r', '--report', action='store_true', default=False,
+                        help='Generate Animations for the report')
+    parser.add_argument('-j', '--gif', action='store_true', default=False,
+                        help='Generate gif versions')
     args= parser.parse_args()
     args.filename = args.filename[0]
     return args
