@@ -8,7 +8,7 @@ import numpy as np
 class TestSystem(object):
     @pytest.fixture
     def system(self):
-        return willfarmer_hw5.System('./smallState.txt')
+        return willfarmer_hw5.System('./hw5/smallState.txt')
 
     def test_file_parser(self, system):
         filesystem = np.array([
