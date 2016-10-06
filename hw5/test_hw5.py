@@ -99,6 +99,22 @@ class TestMask(object):
                           [1, 1, 0]])
         assert mask.overlap(mask0) is False
 
+    def test_parse_locations(self, mask):
+        mask.parse_locations(3, 3, [[0, 0], [1, 1], [1, 0]])
+        mask0 = willfarmer_hw5.Mask()
+        mask0.parse_list([[1, 0, 0],
+                          [1, 1, 0],
+                          [0, 0, 0]])
+        assert mask.overlap(mask0) is True
+
+    def test_make_valid(self, mask):
+        mask.parse_list([[1, 0, 0],
+                         [1, 0, 1],
+                         [0, 0, 1]])
+        mask.make_valid()
+        assert mask.is_valid
+        assert mask.mask[0, 0] == 1 or mask.mask[2, 2] == 1
+
 
 class TestSolution(object):
     @pytest.fixture
@@ -128,13 +144,13 @@ class TestSolution(object):
 
     def test_openspots(self, solution):
         for _ in range(100):
-            y, x = solution.get_openspots(0)
+            y, x = solution.get_random_openspot(0)
             assert 0 <= y < len(solution.full_mask)
             assert 0 <= x < len(solution.full_mask[0])
-        assert not any(solution.get_openspots(5))
+        assert not any(solution.get_random_openspot(5))
         solution.full_mask[0, 0] = 1
         for _ in range(10):
-            y, x = solution.get_openspots(1)
+            y, x = solution.get_random_openspot(1)
             assert y == 0
             assert x == 0
 

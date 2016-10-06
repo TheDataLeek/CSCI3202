@@ -19,9 +19,17 @@ unless we get extraordinarily lucky, however it will be a good approximation.
 
 ## What is a "Fitness Function"?
 
-Before we dive into what exactly these algorithms are, let's talk about "fitness
-functions". These are simply functions that "score" a system and give you a
-number back. These functions are usually then maximized.
+Let's look at what [the wikipedia
+page](https://en.wikipedia.org/wiki/Fitness_function) says on the matter.
+
+> A fitness function is a particular type of objective function that is used to
+> summarise, as a single figure of merit, how close a given design solution is
+> to achieving the set aims.
+
+So in a nutshell, it's a single number that basically tells us how "good" of a
+solution we have. For our genetic algorithm and simulated annealing approach
+we'll want to maximize this number, thereby maximizing how "good" our solutions
+are.
 
 ## What is Simulated Annealing?
 
@@ -104,11 +112,11 @@ D D D D D D R D
 
 Which can be plotted for readability.
 
-![png](./smallState_initial.png)
+![png](./img/smallState_initial.png)
 
 And our other (larger) state looks like the following.
 
-![png](./largeState_initial.png)
+![png](./img/largeState_initial.png)
 
 This pattern will continue for the rest of the writeup, I'll talk about (and
 show) the smaller version first, and then follow up with the larger version.
@@ -118,6 +126,15 @@ show) the smaller version first, and then follow up with the larger version.
 So in the context of our problem, we can examine how the code actually works.
 
 ### Overall Structure
+
+* `main` is responsible for running and calling everything
+* `genetic_algorithm` uses a genetic approach to solve the problem
+* `simulated_annealing` likewise uses simulated annealing
+* Each solution uses a `System` instance which keeps track of the system state
+* Each solution is an instance of a `Solution` which also keeps track of its
+  particular state
+* Each district is a `Mask` which provides an ease of access through
+  abstraction.
 
 ```python
  +main : function
@@ -201,9 +218,9 @@ class Solution(object):
 ...
 ```
 
-![gif](./generate_random_solution_smallState.gif)
+![gif](./img/generate_random_solution_smallState.gif)
 
-![gif](./generate_random_solution_largeState.gif)
+![gif](./img/generate_random_solution_largeState.gif)
 
 ### Simulated Annealing
 
@@ -235,19 +252,19 @@ def simulated_annealing(system, numdistricts, precision, animate, makegif):
 
 The entire process looks like this:
 
-![gif](./simulated_annealing_solution_smallState.gif)
+![gif](./img/simulated_annealing_solution_smallState.gif)
 
 Which has the following final solution.
 
-![png](./simulated_annealing_solution_smallState.png)
+![png](./img/simulated_annealing_solution_smallState.png)
 
 And for the large system,
 
-![gif](./simulated_annealing_solution_largeState.gif)
+![gif](./img/simulated_annealing_solution_largeState.gif)
 
 Which has the following final solution.
 
-![png](./simulated_annealing_solution_largeState.png)
+![png](./img/simulated_annealing_solution_largeState.png)
 
 #### Mutations
 
@@ -281,7 +298,7 @@ class Solution(object):
 ...
 ```
 
-![png](./mutation.png)
+![png](./img/mutation.png)
 
 ### Genetic Algorithm
 
@@ -316,19 +333,19 @@ def genetic_algorithm(system, numdistricts, precision, animate, makegif):
 
 The entire process looks like this:
 
-![gif](./genetic_algorithm_solution_smallState.gif)
+![gif](./img/genetic_algorithm_solution_smallState.gif)
 
 Which has the following final solution.
 
-![png](./genetic_algorithm_solution_smallState.png)
+![png](./img/genetic_algorithm_solution_smallState.png)
 
 And for the large system,
 
-![gif](./genetic_algorithm_solution_largeState.gif)
+![gif](./img/genetic_algorithm_solution_largeState.gif)
 
 Which has the following final solution.
 
-![png](./genetic_algorithm_solution_largeState.png)
+![png](./img/genetic_algorithm_solution_largeState.png)
 
 #### Combining Solutions
 
@@ -362,7 +379,7 @@ class Solution(object):
         return new_solution
 ```
 
-![png](./combine.png)
+![png](./img/combine.png)
 
 ### Fitness Function
 

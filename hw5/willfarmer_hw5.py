@@ -12,10 +12,18 @@ Notes on implementation:
     https://github.com/willzfarmer/CSCI3202/tree/master/hw5
     * Test coverage is around 80% which I'm happy with. All the super important
     things are tested.
+
+TODO: Write all assets to ./img directory
+TODO: Multithread for sexiness
+
+~~TODO: Rename get_openspots to get_random_openspot~~
+~~TODO: Mutations always valid~~
+~~TODO: children always valid~~
 """
 
 # stdlib imports
 import sys
+import os
 import argparse
 import math
 import random
@@ -25,15 +33,16 @@ import queue
 import time
 
 # pypi imports
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import moviepy
-from moviepy import editor
-from tqdm import tqdm
+import numpy as np                       # heavy lifting
+import matplotlib.pyplot as plt          # visualization
+import matplotlib.animation as animation # animation
+import moviepy                           # export to gif
+from moviepy import editor               # More gif
+from tqdm import tqdm                    # Progress bars are nice
 
 
-FIGSIZE = (4, 4)
+FIGSIZE = (4, 4)  # For asset exporting
+OUTDIR = './img'
 
 
 def main():
@@ -117,7 +126,7 @@ def genetic_algorithm(system, numdistricts, precision, animate, makegif):
         if len(top_history) == 0 or solutions[0] != top_history[-1]:
             top_history.append(solutions[0])
 
-    solution = solutions[0]
+    solution = top_history[-1]
     solution.count = precision
     solution.algo = 'Genetic Algorithm'
     print(solution)
@@ -145,7 +154,7 @@ def generate_report_assets(system, numdistricts, precision, makegif):
                cmap=plt.get_cmap('cool'))
     plt.axis('off')
     plt.title(system.filename)
-    plt.savefig(system.filename.split('.')[0] + '_initial.png')
+    plt.savefig(os.path.join(OUTDIR, system.filename.split('.')[0] + '_initial.png'))
 
     # Now generate random solution
     solution = Solution(system, numdistricts)
@@ -171,7 +180,7 @@ def generate_report_assets(system, numdistricts, precision, makegif):
                     cmap=plt.get_cmap('gnuplot'))
     axarr[2].axis('off')
     axarr[2].set_title('Difference')
-    plt.savefig('mutation.png')
+    plt.savefig(os.path.join(OUTDIR, 'mutation.png'))
 
     # Now show combination
     solution.full_mask[:] = 0
@@ -190,7 +199,7 @@ def generate_report_assets(system, numdistricts, precision, makegif):
                     cmap=plt.get_cmap('gnuplot'))
     axarr[2].axis('off')
     axarr[2].set_title('Child')
-    plt.savefig('combine.png')
+    plt.savefig(os.path.join(OUTDIR, 'combine.png'))
 
 
 def animate_history(filename, systemdata, history, numdistricts, makegif, algo_name=None):
@@ -228,11 +237,11 @@ def animate_history(filename, systemdata, history, numdistricts, makegif, algo_n
     if not algo_name:
         algo_name = re.sub(' ', '_', history[-1].algo.lower())
     filename = '{}_solution_{}'.format(algo_name, filename.split('.')[0])
-    ani.save(filename + '.mp4')
+    ani.save(os.path.join(OUTDIR, filename + '.mp4'))
 
     if makegif:
-        editor.VideoFileClip(filename + '.mp4')\
-                .write_gif(filename + '.gif')
+        editor.VideoFileClip(os.path.join(OUTDIR, filename + '.mp4'))\
+                .write_gif(os.path.join(OUTDIR, filename + '.gif'))
 
     # Save final solution as separate image
     if history[-1].algo is not None:
@@ -243,7 +252,7 @@ def animate_history(filename, systemdata, history, numdistricts, makegif, algo_n
                    vmax=numdistricts)
         plt.title(history[-1].algo + ' Final Solution')
         plt.axis('off')
-        plt.savefig(filename + '.png')
+        plt.savefig(os.path.join(OUTDIR, filename + '.png'))
 
 
 class Solution(object):
@@ -271,6 +280,12 @@ class Solution(object):
     def __str__(self):
         """String version is just the string version of numpy array"""
         return str(self.full_mask)
+
+    def __eq__(self, other):
+        return (self.full_mask == other.full_mask).all()
+
+    def __ne__(self, other):
+        return not (self == other)
 
     def summary(self):
         """This is literally only here for the grading..."""
@@ -342,7 +357,7 @@ class Solution(object):
         axarr[0].axis('off')
         axarr[1].axis('off')
         if save:
-            plt.savefig(name)
+            plt.savefig(os.path.join(OUTDIR, name))
         else:
             plt.show()
 
@@ -403,7 +418,7 @@ class Solution(object):
         """
         return (self.full_mask == i).astype(int)
 
-    def get_openspots(self, value):
+    def get_random_openspot(self, value):
         """
         Return a random location where our full mask is equal to value
 
@@ -411,7 +426,7 @@ class Solution(object):
             [[1, 1, 2],
              [1, 2, 3],
              [2, 2, 3]]
-        self.get_openspots(1) could return any of
+        self.get_random_openspot(1) could return any of
             [[0, 0], [0, 1], [1, 0]]
         """
         openspots = np.where(self.full_mask == value)
@@ -472,7 +487,7 @@ class Solution(object):
         self.get_district_neighbors(1) will return (not necessarily sorted)
             [[2, 0], [2, 1], [1, 1], [1, 2], [0, 2]]
         """
-        y, x = self.get_openspots(i)
+        y, x = self.get_random_openspot(i)
         q = queue.Queue()
         q.put((y, x))
         edges = []
@@ -509,7 +524,14 @@ class Solution(object):
         districts = list(range(1, self.numdistricts + 1))
         history = []
         while (self.full_mask == 0).any():
-            i = districts[random.randint(0, len(districts) - 1)]
+            try:
+                i = districts[random.randint(0, len(districts) - 1)]
+            except ValueError:
+                for j in range(1, self.numdistricts):
+                    if len(self.get_filtered_district_neighbors(j, [0])) != 0:
+                        districts = [j]
+                        i = j
+                        break
             neighbors = self.get_filtered_district_neighbors(i, [0])
             if len(neighbors) == 0:
                 districts.remove(i)
@@ -530,7 +552,7 @@ class Solution(object):
         """
         solution_history = [self.copy()]
         for i in range(1, self.numdistricts + 1):
-            y, x = self.get_openspots(0)
+            y, x = self.get_random_openspot(0)
             self.full_mask[y, x] = i
             if history:
                 solution_history.append(self.copy())
@@ -544,7 +566,7 @@ class Solution(object):
         district is at least size 2, replace the point with our district
         """
         i = np.random.randint(1, self.numdistricts)
-        y, x = self.get_openspots(i)
+        y, x = self.get_random_openspot(i)
         if y is None:
             raise IndexError('No open spots? Something is real bad')
         traversed = set()
@@ -552,17 +574,21 @@ class Solution(object):
         q.put((y, x))
         while not q.empty():
             y, x = q.get()
-            traversed.add((y, x))
+            if (y, x) not in traversed:
+                traversed.add((y, x))
 
-            if (self.full_mask[y, x] != i and
-                    self[self.full_mask[y, x]].size > 1):
-                self.full_mask[y, x] = i
-                break
+                if (self.full_mask[y, x] != i and
+                        self[self.full_mask[y, x]].size > 1):
+                    old_value = self.full_mask[y, x]
+                    self.full_mask[y, x] = i
+                    if not self.is_valid:  # make sure new mutation is valid
+                        # If not, reset and start over
+                        self.full_mask[y, x] = old_value
+                    else:
+                        break
 
-            neighbors = [_ for _ in self.get_neighbors(y, x)
-                         if _ not in traversed]
-            for ii, jj in neighbors:
-                q.put((ii, jj))
+                for ii, jj in self.get_neighbors(y, x):
+                    q.put((ii, jj))
 
     def combine(self, other_solution):
         """
@@ -572,26 +598,43 @@ class Solution(object):
         """
         new_solution = Solution(self.system, self.numdistricts)
 
+        # Randomly order parents to choose from
         pick_order = [self, other_solution]
         random.shuffle(pick_order)
-        cursor = 0
-        for i in range(1, self.numdistricts + 1):
+        # Randomly order districts to choose from
+        districts = list(range(1, self.numdistricts + 1))
+        random.shuffle(districts)
+        cursor = 0  # alternates between parents
+        for i in districts:
             parent_locations = pick_order[cursor][i].location
             open_locations = new_solution.get_full_openspots(0)
-            combined = [(y, x) for y, x in parent_locations
-                        if [y, x] in open_locations]
-            for y, x in combined:
+            district = Mask()
+            # We make every child valid
+            district.parse_locations(self.height, self.width,
+                                     [(y, x) for y, x in parent_locations
+                                      if [y, x] in open_locations])
+            if not district.is_valid:
+                district.make_valid()
+            for y, x in district.location:
                 new_solution.full_mask[y, x] = i
             cursor ^= 1
         for i in range(1, self.numdistricts + 1):
-            y, x = new_solution.get_openspots(i)
+            y, x = new_solution.get_random_openspot(i)
             if y is None:
-                y, x = new_solution.get_openspots(0)
+                y, x = new_solution.get_random_openspot(0)
                 new_solution.full_mask[y, x] = i
         new_solution.fill()
         if random.random() < 0.1:
             new_solution.mutate()
         return new_solution
+
+    @property
+    def height(self):
+        return self.full_mask.shape[0]
+
+    @property
+    def width(self):
+        return self.full_mask.shape[1]
 
 
 class System(object):
@@ -704,6 +747,22 @@ class Mask(object):
         self.mask = np.array(listvals)
         self.height, self.width = self.mask.shape
 
+    def parse_locations(self, height, width, locations):
+        self.mask = np.zeros((height, width))
+        for y, x in locations:
+            self.mask[y, x] = 1
+
+    def make_valid(self):
+        if not self.is_valid:
+            curlab, labels = self.get_labels()
+            num_components = labels.max()
+            keep = random.randint(1, num_components)
+            spots = np.where(labels != keep)
+            for i in range(len(spots[0])):
+                y, x = spots[0][i], spots[1][i]
+                self.mask[y, x] = 0
+            return (self.mask == keep).astype(int)
+
     @property
     def size(self):
         """Number of elements in mask"""
@@ -718,8 +777,7 @@ class Mask(object):
             spots.append([raw_spots[0][i], raw_spots[1][i]])
         return spots
 
-    @property
-    def is_valid(self):
+    def get_labels(self):
         """
         Valid masks have a single connected component.
 
@@ -751,6 +809,11 @@ class Mask(object):
                                 labels[ii, jj] = curlab
                                 q.put((ii, jj))
                     curlab += 1
+        return curlab, labels
+
+    @property
+    def is_valid(self):
+        curlab, labels = self.get_labels()
         if curlab > 2:
             return False
         else:
