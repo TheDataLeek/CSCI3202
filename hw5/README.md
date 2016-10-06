@@ -111,6 +111,64 @@ show) the smaller version first, and then follow up with the larger version.
 
 So in the context of our problem, we can examine how the code actually works.
 
+### Overall Structure
+
+```python
+▼+animate_history : function
+   +update_plot : function
+
+ +generate_report_assets : function
+
+ +genetic_algorithm : function
+
+ +get_args : function
+
+ +main : function
+
+ +simulated_annealing : function
+
+▼ Mask : class
+   +__init__ : function
+   -__str__ : function
+  ▼+is_valid : function
+     +unlabelled : function
+   +location : function
+   +overlap : function
+   +parse_list : function
+   +size : function
+
+▼ Solution : class
+   -__getitem__ : function
+   +__init__ : function
+   -__str__ : function
+   +combine : function
+   +copy : function
+   +fill : function
+   +generate_random_solution : function
+   +get_district_neighbors : function
+   +get_filtered_district_neighbors : function
+   +get_full_openspots : function
+   +get_neighbors : function
+   +get_openspots : function
+   +get_solution : function
+   +is_valid : function
+   +majority : function
+   +mutate : function
+   +show : function
+   +summary : function
+   +value : function
+
+▼ System : class
+   -__getitem__ : function
+   +__init__ : function
+   +_name_arr : function
+   +_read_file : function
+   +empty_state : function
+   +height : function
+   +stats : function
+   +width : function
+```
+
 ### Helpful Code
 
 ### Generating Random Solutions
