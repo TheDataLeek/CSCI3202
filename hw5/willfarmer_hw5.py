@@ -114,7 +114,7 @@ def genetic_algorithm(system, numdistricts, precision, animate, makegif):
                      sorted([(s, s.value) for s in full_solutions],
                             key=lambda tup: -tup[1])[:3]]
         # Only record top from generation, and only if it's changed
-        if solutions[0] != top_history[-1]:
+        if len(top_history) == 0 or solutions[0] != top_history[-1]:
             top_history.append(solutions[0])
 
     solution = solutions[0]

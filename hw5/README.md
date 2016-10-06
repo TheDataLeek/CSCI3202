@@ -7,9 +7,15 @@ Summary: How to generate solutions of hard problems with simulations.
 
 # An Introduction to Simulated Annealing and Genetic Algorithms
 
-Simulated Annealing and Genetic Algorithms are both methods of finding solutions
-to problems through simulations. They are similar in many ways, but also very
-different.
+[Simulated Annealing](https://en.wikipedia.org/wiki/Simulated_annealing) and
+[Genetic Algorithms](https://en.wikipedia.org/wiki/Genetic_algorithm) are both
+methods of finding solutions to problems through simulations. In a nutshell,
+basically testing a large amount of semi-random solutions, looking at random
+combinations of our solutions, and then keeping the best that we encounter.
+
+The benefit of these algorithms is that we can relatively quickly approximate a
+good solution without much computation time. Our solution won't be "the best"
+unless we get extraordinarily lucky, however it will be a good approximation.
 
 ## What is a "Fitness Function"?
 
@@ -114,22 +120,13 @@ So in the context of our problem, we can examine how the code actually works.
 ### Overall Structure
 
 ```python
-▼+animate_history : function
-   +update_plot : function
-
- +generate_report_assets : function
+ +main : function
 
  +genetic_algorithm : function
-
- +get_args : function
-
- +main : function
 
  +simulated_annealing : function
 
 ▼ Mask : class
-   +__init__ : function
-   -__str__ : function
   ▼+is_valid : function
      +unlabelled : function
    +location : function
@@ -138,9 +135,6 @@ So in the context of our problem, we can examine how the code actually works.
    +size : function
 
 ▼ Solution : class
-   -__getitem__ : function
-   +__init__ : function
-   -__str__ : function
    +combine : function
    +copy : function
    +fill : function
@@ -159,10 +153,6 @@ So in the context of our problem, we can examine how the code actually works.
    +value : function
 
 ▼ System : class
-   -__getitem__ : function
-   +__init__ : function
-   +_name_arr : function
-   +_read_file : function
    +empty_state : function
    +height : function
    +stats : function
