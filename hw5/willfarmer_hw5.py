@@ -13,9 +13,9 @@ Notes on implementation:
     * Test coverage is around 80% which I'm happy with. All the super important
     things are tested.
 
-TODO: Write all assets to ./img directory
 TODO: Multithread for sexiness
 
+~~TODO: Write all assets to ./img directory~~
 ~~TODO: Rename get_openspots to get_random_openspot~~
 ~~TODO: Mutations always valid~~
 ~~TODO: children always valid~~
@@ -103,6 +103,10 @@ def simulated_annealing(system, numdistricts, precision, animate, makegif):
 
 
 def get_good_start(system, numdistricts):
+    """
+    Basically, instead of starting with a really bad initial solution for
+    simulated annealing sometimes we can rig it to start with a decent one...
+    """
     print('Acquiring a good initial solution')
     solution = Solution(system, numdistricts)
     solution.generate_random_solution()  # start with random solution
@@ -392,6 +396,9 @@ class Solution(object):
 
     @property
     def majorities(self):
+        """
+        Tell us the number of districts with majority in each party
+        """
         majorities = {k:0 for k in self.system.names.keys()}
         for i in range(1, self.numdistricts + 1):
             majorities[self.system._name_arr[self.majority(i)]] += 1
@@ -402,12 +409,32 @@ class Solution(object):
         """
         This is our fitness function.
 
-        We're trying to maximize similarity in districts, as well as make sure
-        that the size of each district is at least 1.
+        Here's what we're doing here
+        1. Make sure we have valid solution
+        2. Make sure that the population distribution matches the district
+        distribution within 10%
+        3. The value of a solution is just the sum of our district solutions
+        4. Each district has value equal to the absolute value difference
+        between party population sizes. For instance, a district with [R, D, D]
+        has value 2.
+        5. We also look for the optimal district size which is just
+        (width*height/numdistricts), and subtract 1 for every point off we are
+        from "optimal"
+        6. Lastly we say that independent voters are a fixed effect in "rogue"
+        districts, so every district with a rogue voter counts as 0.1 towards
+        the total. This can be seen as just the sum for the following district
+                [R, D, D]
+            sum([-0.9, 1, 1]) = 2.1
         """
         value = 0
         if not self.is_valid:  # if we don't have a valid solution, return 0
-            return value
+            return 0
+        # Make sure the number of districts tries to match population
+        # distribution within 10%
+        size, stats = self.system.stats
+        for k, v in self.majorities.items():
+            if np.abs((float(v) / self.numdistricts) - stats[k]) >= 0.1:
+                return 0
         district_size = int(self.width * self.height / self.numdistricts)
         # Sum up values of each district
         for i in range(1, self.numdistricts + 1):
