@@ -75,11 +75,12 @@ def simulated_annealing(system, numdistricts, precision, animate, makegif):
     Perform simulated annealing on our system with a series of progressively
     improving solutions.
     """
-    solution = Solution(system, numdistricts)
-    solution.generate_random_solution()  # start with random solution
+    solution = get_good_start(system, numdistricts)
     history = [solution]  # Keep track of our history
-    k = 0.4  # Larger k => more chance of randomly accepting
+    k = 0.8  # Larger k => more chance of randomly accepting
     Tvals = np.arange(1, 1e-12, -1.0 / precision)
+    print('Running Simulated Annealing with k={:0.03f}, alpha={:0.05f}'\
+            .format(k, 1.0 / precision))
     for i, T in tqdm(enumerate(Tvals), total=len(Tvals)):
         new_solution = solution.copy()  # copy our current solution
         new_solution.mutate()  # Mutate the copy
@@ -99,6 +100,19 @@ def simulated_annealing(system, numdistricts, precision, animate, makegif):
         animate_history(system.filename, system.matrix,
                         history, solution.numdistricts,
                         makegif)
+
+
+def get_good_start(system, numdistricts):
+    print('Acquiring a good initial solution')
+    solution = Solution(system, numdistricts)
+    solution.generate_random_solution()  # start with random solution
+    for i in tqdm(range(100)):
+        new_solution = Solution(system, numdistricts)
+        new_solution.generate_random_solution()
+        if new_solution.value > solution.value:
+            solution = new_solution
+    print('Starting with Solution[{}]'.format(solution.value))
+    return solution
 
 
 def genetic_algorithm(system, numdistricts, precision, animate, makegif):
@@ -207,7 +221,7 @@ def animate_history(filename, systemdata, history, numdistricts, makegif, algo_n
     Take our given solution history, and animate it using matplotlib.animate.
     Save to gif if asked.
     """
-    print('Saving to File')
+    print('Saving Animation')
     fig, axarr = plt.subplots(1, 2, figsize=FIGSIZE)
     # Plot our "field"
     systemplot = axarr[0].imshow(systemdata, interpolation='nearest',
@@ -377,6 +391,13 @@ class Solution(object):
         return valid
 
     @property
+    def majorities(self):
+        majorities = {k:0 for k in self.system.names.keys()}
+        for i in range(1, self.numdistricts + 1):
+            majorities[self.system._name_arr[self.majority(i)]] += 1
+        return majorities
+
+    @property
     def value(self):
         """
         This is our fitness function.
@@ -387,6 +408,7 @@ class Solution(object):
         value = 0
         if not self.is_valid:  # if we don't have a valid solution, return 0
             return value
+        district_size = int(self.width * self.height / self.numdistricts)
         # Sum up values of each district
         for i in range(1, self.numdistricts + 1):
             values = self.system.matrix[self[i].mask.astype(bool)]
@@ -396,11 +418,13 @@ class Solution(object):
             else:
                 # District value is simply abs(num_red - num_blue)
                 subvalue = np.abs(len(values[values == 0]) - len(values[values == 1]))
+                size_bonus = np.abs(len(values) - district_size)
                 if subvalue < len(values):
                     # For any non-uniform values, add 10% their value to account
                     # for independent voter turnout
                     subvalue += (len(values) - subvalue) * 0.1
                 value += subvalue
+                value -= size_bonus
         return value
 
     def get_solution(self, i):
@@ -527,6 +551,9 @@ class Solution(object):
             try:
                 i = districts[random.randint(0, len(districts) - 1)]
             except ValueError:
+                # So here's a neat bug... Sometimes if there's a zero in the
+                # corner, get filtered won't find it. So this code is here to
+                # forcibly fix this problem.
                 for j in range(1, self.numdistricts):
                     if len(self.get_filtered_district_neighbors(j, [0])) != 0:
                         districts = [j]
