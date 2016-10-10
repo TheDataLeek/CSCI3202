@@ -110,10 +110,40 @@ class TestMask(object):
     def test_make_valid(self, mask):
         mask.parse_list([[1, 0, 0],
                          [1, 0, 1],
-                         [0, 0, 1]])
+                         [1, 0, 1]])
         mask.make_valid()
-        assert mask.is_valid
-        assert mask.mask[0, 0] == 1 or mask.mask[2, 2] == 1
+        mask0 = willfarmer_hw5.Mask()
+        mask0.parse_list([[0, 0, 0],
+                          [0, 0, 1],
+                          [0, 0, 1]])
+        mask1 = willfarmer_hw5.Mask()
+        mask1.parse_list([[1, 0, 0],
+                          [1, 0, 0],
+                          [1, 0, 0]])
+        assert mask.overlap(mask0) or mask.overlap(mask1)
+
+        mask.parse_list([[1, 0, 1],
+                         [0, 0, 0],
+                         [1, 0, 1]])
+        mask.make_valid()
+        mask0 = willfarmer_hw5.Mask()
+        mask0.parse_list([[0, 0, 0],
+                          [0, 0, 0],
+                          [0, 0, 1]])
+        mask1 = willfarmer_hw5.Mask()
+        mask1.parse_list([[1, 0, 0],
+                          [0, 0, 0],
+                          [0, 0, 0]])
+        mask2 = willfarmer_hw5.Mask()
+        mask2.parse_list([[0, 0, 0],
+                          [0, 0, 0],
+                          [1, 0, 0]])
+        mask3 = willfarmer_hw5.Mask()
+        mask3.parse_list([[0, 0, 0],
+                          [0, 0, 0],
+                          [0, 0, 1]])
+        assert (mask.overlap(mask0) or mask.overlap(mask1)
+                or mask.overlap(mask2) or mask.overlap(mask3))
 
 
 class TestSolution(object):

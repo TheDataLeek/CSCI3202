@@ -203,21 +203,54 @@ def generate_report_assets(system, numdistricts, precision, makegif):
     # Now show combination
     solution.full_mask[:] = 0
     solution.generate_random_solution()
-    fig, axarr = plt.subplots(1, 3, figsize=FIGSIZE)
-    axarr[0].imshow(backup.full_mask, interpolation='nearest',
-                    cmap=plt.get_cmap('gnuplot'))
-    axarr[0].axis('off')
-    axarr[0].set_title('Parent 1')
-    axarr[1].imshow(solution.full_mask, interpolation='nearest',
-                    cmap=plt.get_cmap('gnuplot'))
-    axarr[1].axis('off')
-    axarr[1].set_title('Parent 2')
-    child = backup.combine(solution)
-    axarr[2].imshow(child.full_mask, interpolation='nearest',
-                    cmap=plt.get_cmap('gnuplot'))
-    axarr[2].axis('off')
-    axarr[2].set_title('Child')
-    plt.savefig(os.path.join(OUTDIR, 'combine.png'))
+    fig, axarr = plt.subplots(2, 2, figsize=FIGSIZE)
+    axarr[0, 0].imshow(backup.full_mask, interpolation='nearest',
+                       cmap=plt.get_cmap('gnuplot'),
+                       vmin=0,
+                       vmax=solution.numdistricts)
+    axarr[0, 0].axis('off')
+    axarr[0, 0].set_title('Parent 1')
+    axarr[0, 1].imshow(solution.full_mask, interpolation='nearest',
+                       cmap=plt.get_cmap('gnuplot'),
+                       vmin=0,
+                       vmax=solution.numdistricts)
+    axarr[0, 1].axis('off')
+    axarr[0, 1].set_title('Parent 2')
+
+    child, history = backup.combine(solution, keep_history=True)
+    axarr[1, 1].imshow(child.full_mask, interpolation='nearest',
+                       cmap=plt.get_cmap('gnuplot'),
+                       vmin=0,
+                       vmax=solution.numdistricts)
+    axarr[1, 1].axis('off')
+    axarr[1, 1].set_title('Child')
+
+    sol = axarr[1, 0].imshow(history[0].full_mask, interpolation='nearest',
+                             cmap=plt.get_cmap('gnuplot'),
+                             vmin=0,
+                             vmax=child.numdistricts)
+    axarr[1, 0].axis('off')
+    axarr[1, 0].set_title('Step by Step')
+
+    def update(i):
+        sol.set_data(history[i].full_mask)
+        return sol,
+
+    ani = animation.FuncAnimation(fig, update, len(history),
+                                  interval=500, blit=True)
+    filename = 'combine'
+    ani.save(os.path.join(OUTDIR, filename + '.mp4'))
+    editor.VideoFileClip(os.path.join(OUTDIR, filename + '.mp4'))\
+            .write_gif(os.path.join(OUTDIR, filename + '.gif'))
+
+    # Now show the difference in k for simulated annealing
+    plt.figure(figsize=FIGSIZE)
+    Tvals = np.arange(1, 1e-12, -1.0 / precision)
+    dv = -1
+    determine_k = lambda T, k: np.exp(dv / (k * T))
+    for k in np.linspace(0.01, 1, 100):
+        plt.plot(Tvals, determine_k(Tvals, k))
+    plt.savefig(os.path.join(OUTDIR, 'kvals.png'))
 
 
 def animate_history(filename, systemdata, history, numdistricts, makegif, algo_name=None):
@@ -644,14 +677,13 @@ class Solution(object):
                 for ii, jj in self.get_neighbors(y, x):
                     q.put((ii, jj))
 
-    def combine(self, other_solution):
+    def combine(self, other_solution, keep_history=False):
         """
         Look at both solutions, alternate between them randomly, and try to
         basically inject one side at a time. Afterwards fill the gaps in with
         fill()
         """
         new_solution = Solution(self.system, self.numdistricts)
-
         # Randomly order parents to choose from
         pick_order = [self, other_solution]
         random.shuffle(pick_order)
@@ -659,6 +691,7 @@ class Solution(object):
         districts = list(range(1, self.numdistricts + 1))
         random.shuffle(districts)
         cursor = 0  # alternates between parents
+        history = [new_solution.copy()]
         for i in districts:
             parent_locations = pick_order[cursor][i].location
             open_locations = new_solution.get_full_openspots(0)
@@ -672,14 +705,21 @@ class Solution(object):
             for y, x in district.location:
                 new_solution.full_mask[y, x] = i
             cursor ^= 1
+            if keep_history:
+                history.append(new_solution.copy())
         for i in range(1, self.numdistricts + 1):
             y, x = new_solution.get_random_openspot(i)
             if y is None:
                 y, x = new_solution.get_random_openspot(0)
                 new_solution.full_mask[y, x] = i
-        new_solution.fill()
+                if keep_history:
+                    history.append(new_solution.copy())
+        history += new_solution.fill(keep_history=True)
         if random.random() < 0.1:
             new_solution.mutate()
+            history.append(new_solution.copy())
+        if keep_history:
+            return new_solution, history
         return new_solution
 
     @property
@@ -796,6 +836,11 @@ class Mask(object):
         """Numpy string version of array"""
         return str(self.mask)
 
+    @property
+    def size(self):
+        """Number of elements in mask"""
+        return self.mask.sum()
+
     def parse_list(self, listvals):
         """given some entry list, set our mask to be those vals"""
         self.mask = np.array(listvals)
@@ -815,12 +860,8 @@ class Mask(object):
             for i in range(len(spots[0])):
                 y, x = spots[0][i], spots[1][i]
                 self.mask[y, x] = 0
+            assert self.is_valid  # CAUSE IM SCRED
             return (self.mask == keep).astype(int)
-
-    @property
-    def size(self):
-        """Number of elements in mask"""
-        return self.mask.sum()
 
     @property
     def location(self):
@@ -874,7 +915,7 @@ class Mask(object):
             return True
 
     def overlap(self, mask):
-        """Tells us if two masks overlap. Deprecated"""
+        """Tells us if two masks overlap. Used in test code"""
         if ((self.mask + mask.mask) > 1).any():
             return True
         else:

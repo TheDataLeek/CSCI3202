@@ -127,6 +127,8 @@ So in the context of our problem, we can examine how the code actually works.
 
 ### Overall Structure
 
+The structure is as follows:
+
 * `main` is responsible for running and calling everything
 * `genetic_algorithm` uses a genetic approach to solve the problem
 * `simulated_annealing` likewise uses simulated annealing
@@ -137,59 +139,247 @@ So in the context of our problem, we can examine how the code actually works.
   abstraction.
 
 ```python
- +main : function
-
- +genetic_algorithm : function
-
- +simulated_annealing : function
-
-▼ Mask : class
-  ▼+is_valid : function
-     +unlabelled : function
-   +location : function
-   +overlap : function
-   +parse_list : function
-   +size : function
-
-▼ Solution : class
-   +combine : function
-   +copy : function
-   +fill : function
-   +generate_random_solution : function
-   +get_district_neighbors : function
-   +get_filtered_district_neighbors : function
-   +get_full_openspots : function
-   +get_neighbors : function
-   +get_openspots : function
-   +get_solution : function
-   +is_valid : function
-   +majority : function
-   +mutate : function
-   +show : function
-   +summary : function
-   +value : function
-
-▼ System : class
-   +empty_state : function
-   +height : function
-   +stats : function
-   +width : function
+ TODO
 ```
+
+So basically how this works is we read in the file, creating a `System`
+instance, and then create an empty `Solution` instance to keep track of our
+changes.
+
+#### Some Quick Notes
+
+* All indexing starts from the upper left point, which is at `(0, 0)`, and all
+  indices are `(y, x)` pairs.
+* There's a hierarchy of the code, our system is represented by a `System`
+  object, and each solution is represented by a `Solution` object, which
+  consists of several `Mask` objects that provide a direct interface to each
+  district.
+* I like properties, so if something looks like it might be doing something
+  complicated under the hood (like the `value` function), it probably is.
 
 ### Helpful Code
 
-### Generating Random Solutions
+While solving this problem, there are a couple sub-problems that we need to
+consider and solve.
+
+#### Finding Neighbors of a Point
+
+Our first big problem is how we find neighbors of a single point. For any `(y,
+x)` pair we can express its neighbors using the following algorithm.
+
+1. Iterate over range(-1, 2) for both x and y
+2. For each loop, accept (y + yi, x + xi) if the following conditions hold:
+    * y + yi is within the range of the field
+    * x + xi is within our domain of the field
+    * xi and yi are not both equal to zero
+
+In python, this is expressed as
+
+```python
+neighbors = [(y0 + y, x0 + x)
+             for x in range(-1, 2)
+             for y in range(-1, 2)
+             if (0 <= y0 + y < self.height) and
+             (0 <= x0 + x < self.width) and
+             not (x == 0 and y == 0)]
+```
+
+#### Determining if a District is Valid
+
+One of the problems we need to solve is to know if any given district we have is
+valid. In our case, valid simply means having a [single connected
+component](https://en.wikipedia.org/wiki/Connected_component_(graph_theory)),
+which we can determine using [connected component
+labelling](https://en.wikipedia.org/wiki/Connected-component_labeling). The
+easiest version of this (which is in the implementation) is just examining a
+single component at a time, and the algorithm is as follows (from wikipedia):
+
+> 1. Start from the first pixel in the image. Set "curlab" (short for "current
+>    label") to 1. Go to (2).
+> 2. If this pixel is a foreground pixel and it is not already labelled, then
+>    give it the label "curlab" and add it as the first element in a queue, then
+>    go to (3). If it is a background pixel or it was already labelled, then
+>    repeat (2) for the next pixel in the image.
+> 3. Pop out an element from the queue, and look at its neighbours (based on any
+>    type of connectivity). If a neighbour is a foreground pixel and is not
+>    already labelled, give it the "curlab" label and add it to the queue.
+>    Repeat (3) until there are no more elements in the queue.
+> 4. Go to (2) for the next pixel in the image and increment "curlab" by 1.
+
+Which is implemented in our code as the following.
+
+```python
+class Mask(object):
+...
+
+    def get_labels(self):
+        curlab = 1
+        labels = np.zeros(self.mask.shape)
+        q = queue.Queue()
+        def unlabelled(i, j):
+            return self.mask[i, j] == 1 and labels[i, j] == 0
+        for i in range(self.height):
+            for j in range(self.width):
+                if unlabelled(i, j):
+                    labels[i, j] = curlab
+                    q.put((i, j))
+                    while not q.empty():
+                        y0, x0 = q.get()
+                        neighbors = [(y0 + y, x0 + x)
+                                     for x in range(-1, 2)
+                                     for y in range(-1, 2)
+                                     if (0 <= y0 + y < self.height) and
+                                     (0 <= x0 + x < self.width) and
+                                     not (x == 0 and y == 0)]
+                        for ii, jj in neighbors:
+                            if unlabelled(ii, jj):
+                                labels[ii, jj] = curlab
+                                q.put((ii, jj))
+                    curlab += 1
+        return curlab, labels
+...
+```
+
+#### Finding District Neighbors
+
+Another huge problem is we have to find all neighbors of a given district. This
+is incredible similar to the Connected Component Labelling process above.
+
+The basic algorithm is as follows.
+
+1. Get a random spot inside the given district
+2. Add this spot to a Queue
+3. Initialize an empty labelling array (as with connected component labelling)
+4. While the queue is not empty, get an new `(y, x)` pair.
+5. If the point falls within the district, get all of the point's neighbors, add
+   them to the queue, and go back to (4)
+6. If the point does not fall into the district, add it to the list of district
+   neighbors.
+
+```python
+class Solution(object):
+...
+    def get_district_neighbors(self, i):
+        y, x = self.get_random_openspot(i)
+        q = queue.Queue()
+        q.put((y, x))
+        edges = []
+        labels = np.zeros(self.full_mask.shape)
+        labels[y, x] = 1
+        while not q.empty():
+            y, x = q.get()
+            if self.full_mask[y, x] == i:
+                for yi, xi in self.get_neighbors(y, x):
+                    if labels[yi, xi] == 0:
+                        q.put((yi, xi))
+                        labels[yi, xi] = 1
+            else:
+                edges.append((y, x))
+        return edges
+...
+```
+
+#### Fitness Function
+
+Both of these methods rely on our heuristic, our "fitness function", being
+accurate and reliable. The final fitness function that we use emphasizes the
+following qualities in its assessment.
+
+1. Validity of solution
+2. Make sure the ratio of `R` to `D` majority districts matches the ratio of `R`
+   to `D` in the general population.
+3. Make sure each district is as homogeneous as possible
+4. Reduce the value of the district if its size isn't close to the "ideal size",
+   which is `total_size / num_districts`.
 
 ```python
 class Solution(object):
 
 ...
 
+    @property
+    def value(self):
+        value = 0
+        if not self.is_valid:  # if we don't have a valid solution, return 0
+            return 0
+        # Make sure the number of districts tries to match population
+        # distribution within 10%
+        size, stats = self.system.stats
+        for k, v in self.majorities.items():
+            if np.abs((float(v) / self.numdistricts) - stats[k]) >= 0.1:
+                return 0
+        district_size = int(self.width * self.height / self.numdistricts)
+        # Sum up values of each district
+        for i in range(1, self.numdistricts + 1):
+            values = self.system.matrix[self[i].mask.astype(bool)]
+            if len(values) == 0:
+                value = 0
+                return value
+            else:
+                # District value is simply abs(num_red - num_blue)
+                subvalue = np.abs(len(values[values == 0]) - len(values[values == 1]))
+                size_bonus = np.abs(len(values) - district_size)
+                if subvalue < len(values):
+                    # For any non-uniform values, add 10% their value to account
+                    # for independent voter turnout
+                    subvalue += (len(values) - subvalue) * 0.1
+                value += subvalue
+                value -= size_bonus
+        return value
+
+...
+```
+
+### Generating Random Solutions
+
+This algorithm is very straightforward.
+
+1. Generate a number of "spawn points" equal to the number of districts.
+2. Fill.
+
+The fill algorithm is also straightforward.
+
+1. Set a list of available districts.
+2. While there are any non-set points, pick a random district, `i`, from the
+   list of available districts.
+3. Get a list of all neighbors of the district, but filter to only 0-valued
+   entries.
+4. If no such neighbors exist, remove this district from the list of available
+   districts.
+5. Otherwise pick a neighbor at random and set it to `i`.
+6. Loop back to (2).
+
+```python
+class Solution(object):
+
+...
+
+    def generate_random_solution(self, history=False):
+        solution_history = [self.copy()]
+        for i in range(1, self.numdistricts + 1):
+            y, x = self.get_random_openspot(0)
+            self.full_mask[y, x] = i
+            if history:
+                solution_history.append(self.copy())
+        solution_history += self.fill(keep_history=history)
+        if history:
+            return solution_history
+
     def fill(self, keep_history=False):
         districts = list(range(1, self.numdistricts + 1))
         history = []
         while (self.full_mask == 0).any():
-            i = districts[random.randint(0, len(districts) - 1)]
+            try:
+                i = districts[random.randint(0, len(districts) - 1)]
+            except ValueError:
+                # So here's a neat bug... Sometimes if there's a zero in the
+                # corner, get filtered won't find it. So this code is here to
+                # forcibly fix this problem.
+                for j in range(1, self.numdistricts):
+                    if len(self.get_filtered_district_neighbors(j, [0])) != 0:
+                        districts = [j]
+                        i = j
+                        break
             neighbors = self.get_filtered_district_neighbors(i, [0])
             if len(neighbors) == 0:
                 districts.remove(i)
@@ -200,23 +390,10 @@ class Solution(object):
                     history.append(self.copy())
         return history
 
-    def generate_random_solution(self, history=False):
-        """
-        Solutions are not guaranteed to be equal in size, as if one gets boxed
-        off it will stay small...
-        """
-        solution_history = [self.copy()]
-        for i in range(1, self.numdistricts + 1):
-            y, x = self.get_openspots(0)
-            self.full_mask[y, x] = i
-            if history:
-                solution_history.append(self.copy())
-        solution_history += self.fill(keep_history=history)
-        if history:
-            return solution_history
-
 ...
 ```
+
+We can see how this looks for our two different state sizes.
 
 ![gif](./img/generate_random_solution_smallState.gif)
 
@@ -224,31 +401,39 @@ class Solution(object):
 
 ### Simulated Annealing
 
+Now that we can do all of that, let's talk about simulated annealing. The basic
+algorithm is as follows.
+
+1. Generate a random solution
+2. Generate a solution neighbor
+3. If the new solution is better than the old, set the current solution to the
+   new one.
+4. If the solution is worse, but `random.random() < math.exp(dv / (k * T))`,
+   where `dv` is the difference between solution values, `k` is a set constant,
+   and `T` is the current iteration value, accept it.
+
 ```python
 def simulated_annealing(system, numdistricts, precision, animate, makegif):
-    solution = Solution(system, numdistricts)
-    solution.generate_random_solution()
-    history = [solution]
-    k = 0.8
-    Tvals = np.arange(1, 1e-12, -1.0/precision)
+    solution = get_good_start(system, numdistricts)
+    history = [solution]  # Keep track of our history
+    k = 0.8  # Larger k => more chance of randomly accepting
+    Tvals = np.arange(1, 1e-12, -1.0 / precision)
+    print('Running Simulated Annealing with k={:0.03f}, alpha={:0.05f}'\
+            .format(k, 1.0 / precision))
     for i, T in tqdm(enumerate(Tvals), total=len(Tvals)):
-        new_solution = solution.copy()
-        new_solution.mutate()
-        dv = new_solution.value - solution.value
-        if (dv > 0 or random.random() < math.exp(dv / (k * T))):
+        new_solution = solution.copy()  # copy our current solution
+        new_solution.mutate()  # Mutate the copy
+        # TODO: Speed this up by keeping current value
+        dv = new_solution.value - solution.value  # Look at delta of values
+        # If it's better, or random chance, we accept it
+        if dv > 0 or random.random() < math.exp(dv / (k * T)):
             solution = new_solution
             history.append(new_solution)
-
-    solution.count = len(Tvals)
-    solution.algo = 'Simulated Annealing'
-    print(solution)
-    print(solution.summary())
-
-    if animate:
-        animate_history(system.filename, system.matrix,
-                        history, solution.numdistricts,
-                        makegif)
 ```
+
+To show how choice of `k` effects the algorithm, we can plot this.
+
+![png](./img/kvals.png)
 
 The entire process looks like this:
 
@@ -268,6 +453,19 @@ Which has the following final solution.
 
 #### Mutations
 
+Much of simulated annealing rests on being able to find a valid neighboring
+solution to our current solution. We do this through a process I call
+"mutation", which simply flips a zone from one district to another, based on
+some randomness and criteria to make the new solution valid.
+
+The general algorithm can be thought of as follows.
+
+1. Find all district neighbors
+2. Pick a neighboring point at random.
+3. If the neighboring point's district has at least size 2, set this neighboring
+   point to our district.
+4. Otherwise, pick a different neighboring point.
+
 ```python
 class Solution(object):
 
@@ -275,7 +473,7 @@ class Solution(object):
 
     def mutate(self):
         i = np.random.randint(1, self.numdistricts)
-        y, x = self.get_openspots(i)
+        y, x = self.get_random_openspot(i)
         if y is None:
             raise IndexError('No open spots? Something is real bad')
         traversed = set()
@@ -283,52 +481,70 @@ class Solution(object):
         q.put((y, x))
         while not q.empty():
             y, x = q.get()
-            traversed.add((y, x))
+            if (y, x) not in traversed:
+                traversed.add((y, x))
 
-            if (self.full_mask[y, x] != i and
-                    self[self.full_mask[y, x]].size > 1):
-                self.full_mask[y, x] = i
-                break
+                if (self.full_mask[y, x] != i and
+                        self[self.full_mask[y, x]].size > 1):
+                    old_value = self.full_mask[y, x]
+                    self.full_mask[y, x] = i
+                    if not self.is_valid:  # make sure new mutation is valid
+                        # If not, reset and start over
+                        self.full_mask[y, x] = old_value
+                    else:
+                        break
 
-            neighbors = [_ for _ in self.get_neighbors(y, x)
-                         if _ not in traversed]
-            for ii, jj in neighbors:
-                q.put((ii, jj))
+                for ii, jj in self.get_neighbors(y, x):
+                    q.put((ii, jj))
 
 ...
 ```
 
+Which can be visualized as follows.
+
 ![png](./img/mutation.png)
+
+#### A Better Starting Point
+
+Instead of naively choosing just one random solution to start with simulated
+annealing, we can instead generate many initial random solutions, and then pick
+the best for our algorithm.
+
+This has the advantage of starting off from a better place, and theoretically
+have less "distance to climb".
 
 ### Genetic Algorithm
 
+This algorithm is also straightforward, and is generally as follows.
+
+1. Generate a set of random "parent" solutions.
+2. From our parents, generate a large set of "children" solutions.
+3. Sort the entire population by their value.
+4. Set our parents to be the "best" of the current population, discard the rest.
+5. Go back to (2).
+
 ```python
 def genetic_algorithm(system, numdistricts, precision, animate, makegif):
+    # Start with random initial solution space (3)
     solutions = [Solution(system, numdistricts) for _ in range(3)]
     for s in solutions:
-        s.generate_random_solution()
-    top_history = []
+        s.generate_random_solution()  # Initialize our solutions
+    top_history = []  # Keep history of our top solution from each "frame"
     for i in tqdm(range(precision)):
         new_solutions = []
-        for _ in range(10):
+        for _ in range(10):  # Create 10 children per frame
             s1, s2 = np.random.choice(solutions, size=2)
+            # Randomly combine two parents
             new_solutions.append(s1.combine(s2))
+        # Combine everything, giving 13 total solutions
         full_solutions = new_solutions + solutions
+        # Keep the top 3 for next generation
         solutions = [_[0] for _ in
-                    sorted([(s, s.value) for s in full_solutions],
-                           key=lambda tup: -tup[1])[:3]]
-        top_history.append(solutions[0])
-
-    solution = solutions[0]
-    solution.count = precision
-    solution.algo = 'Genetic Algorithm'
-    print(solution)
-    print(solution.summary())
-
-    if animate:
-        animate_history(system.filename, system.matrix,
-                        top_history, solution.numdistricts,
-                        makegif)
+                     sorted([(s, s.value) for s in full_solutions],
+                            key=lambda tup: -tup[1])[:3]]
+        # Only record top from generation, and only if it's changed
+        if len(top_history) == 0 or solutions[0] != top_history[-1]:
+            top_history.append(solutions[0])
 ```
 
 The entire process looks like this:
@@ -349,67 +565,81 @@ Which has the following final solution.
 
 #### Combining Solutions
 
+As simulated annealing relies on `mutate()` to narrow down on a good solution,
+the genetic algorithm relies on `combine()` to take two solutions and generate a
+"child" solution.
+
+We can think of the code as follows.
+
+1. Shuffle our two parents in an array.
+2. Shuffle a list of districts.
+3. Set a cursor that points to the first parent in the array.
+4. Iterate through our districts with variable `i`
+5. For the current district, find all points of the parent that our cursor is
+   pointing to.
+6. Get all "open" (i.e. set to 0) points for our child solution
+7. For every point that matches between these two sets, make a new bitmask.
+8. If this bitmask is valid (i.e. one connected component), set all point in
+   this child solution to our current district
+9. Otherwise, make the district valid and set the bits in the child solution
+10. Flip the cursor
+
+The algorithm behind making a district valid is easy, if we have more than one
+connected component in a given district, pick one at random and discard the
+other connected components.
+
 ```python
 class Solution(object):
 
 ...
 
-    def combine(self, other_solution):
+    def combine(self, other_solution, keep_history=False):
+        """
+        Look at both solutions, alternate between them randomly, and try to
+        basically inject one side at a time. Afterwards fill the gaps in with
+        fill()
+        """
         new_solution = Solution(self.system, self.numdistricts)
-
+        # Randomly order parents to choose from
         pick_order = [self, other_solution]
         random.shuffle(pick_order)
-        cursor = 0
-        for i in range(1, self.numdistricts + 1):
+        # Randomly order districts to choose from
+        districts = list(range(1, self.numdistricts + 1))
+        random.shuffle(districts)
+        cursor = 0  # alternates between parents
+        history = [new_solution.copy()]
+        for i in districts:
             parent_locations = pick_order[cursor][i].location
             open_locations = new_solution.get_full_openspots(0)
-            combined = [(y, x) for y, x in parent_locations
-                        if [y, x] in open_locations]
-            for y, x in combined:
+            district = Mask()
+            # We make every child valid
+            district.parse_locations(self.height, self.width,
+                                     [(y, x) for y, x in parent_locations
+                                      if [y, x] in open_locations])
+            if not district.is_valid:
+                district.make_valid()
+            for y, x in district.location:
                 new_solution.full_mask[y, x] = i
             cursor ^= 1
+            if keep_history:
+                history.append(new_solution.copy())
         for i in range(1, self.numdistricts + 1):
-            y, x = new_solution.get_openspots(i)
+            y, x = new_solution.get_random_openspot(i)
             if y is None:
-                y, x = new_solution.get_openspots(0)
+                y, x = new_solution.get_random_openspot(0)
                 new_solution.full_mask[y, x] = i
-        new_solution.fill()
+                if keep_history:
+                    history.append(new_solution.copy())
+        history += new_solution.fill(keep_history=True)
         if random.random() < 0.1:
             new_solution.mutate()
+            history.append(new_solution.copy())
+        if keep_history:
+            return new_solution, history
         return new_solution
 ```
 
+Which can be visualized as follows.
+
 ![png](./img/combine.png)
 
-### Fitness Function
-
-```python
-class Solution(object):
-
-...
-
-    @property
-    def value(self):
-        """
-        This is our fitness function.
-
-        We're trying to maximize similarity in districts, as well as make sure
-        that the size of each district is at least 1.
-        """
-        value = 0
-        if not self.is_valid:
-            return value
-        for i in range(1, self.numdistricts + 1):
-            values = self.system.matrix[self[i].mask.astype(bool)]
-            if len(values) == 0:
-                value = 0
-                return value
-            else:
-                subvalue = np.abs(len(values[values == 0]) - len(values[values == 1]))
-                if subvalue < len(values):
-                    subvalue += (len(values) - subvalue) * 0.1
-                value += subvalue
-        return value
-
-...
-```

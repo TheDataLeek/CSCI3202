@@ -472,9 +472,216 @@ Pruning}{Minimax with \textbackslash{}alpha-\textbackslash{}beta Pruning}}\label
 \end{Highlighting}
 \end{Shaded}
 
+    Example: Demonstrate the AB algorithm on the following tree.
+
+Square nodes are MAX.
+
+Circle nodes are MIN.
+
+Start at the root, initialize alpha to -infinity and beta to inf.
+
+\includegraphics{./img/ABExample1_Corrected.png}
+
+Move to the bottom of the tree, passing the values of alpha and beta all
+the way down. The first player to select is MIN, and MIN will select the
+minimum of its terminal-node children, which is the 3. Set beta = 3 and
+leave alpha unchanged.
+
+\includegraphics{img/ABExample2.png}
+
+Next, evaluate the other child of MIN, which is the 17. Since 17
+\textgreater{} 3, MIN won't select the 17 and the value of beta is
+unchanged.
+
+Once we have a MIN value, we know that MAX will be at least 3 and we can
+set the minimum for MAX, alpha = 3. We've moved up a level in the tree
+and there was an existing value for beta at this level. That value is
+left unchanged.
+
+\includegraphics{img/ABExample3.png}
+
+Next, go to the next child for MAX and traverse to the bottom of the
+tree. The first node that MIN evaluates has a value of 2, which sets
+beta = 2.
+
+\includegraphics{img/ABExample4.png}
+
+MIN now has a maximum value of 2. If its other children have values
+higher than 2, MIN won't select them. However, MAX has a minimum value
+of 3 in its other child, so MAX won't select the 2. We can prune MINs
+other children and not evaluate them. We also see that the condition
+alpha \textless{}= N \textless{}= beta is violated.
+
+Set the MAX value.
+
+\includegraphics{img/ABExample5.png}
+
+Move to the MIN parent node and set beta = 3. MIN might find a value
+lower than 3 in the other branch of the tree, but it will not select a
+value greater than 3. MIN will do no worse than 3.
+
+Recurse to the bottom of the tree, carrying the current alpha and beta
+values at each level. At the bottom of the tree, MIN encounters a value
+of 15. However, beta is not changed because one of the rules of
+alpha-beta pruning is that beta never increases.
+
+\includegraphics{img/ABExample6.png}
+
+At the MAX level, alpha is set to 15. We now have a violation of the
+constraint that alpha \textless{}= N \textless{}= beta. Also, searching
+MAXs other branch is unnecessary because even if MAX finds a value
+greater than 15, its MIN parent will never select it. So, the other
+branch can be pruned.
+
+\includegraphics{img/ABExample7.png}
+
+Assign the parent, which is a MIN node. Return to the root and set the
+value for alpha. The root is a MAX node, setting alpha = 3 means that
+MAX gets an outcome that is at least 3.
+
+\includegraphics{img/ABExample8.png}
+
+Traverse to the bottom of the tree, along the right branch of the root,
+carrying the values for alpha and beta. At the bottom of the tree is a
+value of 2 for MIN, which sets beta = 2. There is now an alpha-beta
+violation and the other children of MIN can be pruned. MIN won't select
+a value greater than 2 and if the 2 made it's way up the tree, it would
+never be selected by MAX at the root.
+
+\includegraphics{img/ABExample9.png}
+
+Set the MIN value as 2 and move up to the MAX parent level. Beta is now
+2 and alpha is still 3.
+
+\includegraphics{img/ABExample10.png}
+
+From the MAX level, recurse to the bottom of the tree along the right
+branch, passing the values for alpha and beta all the way to the bottom
+of the tree. alpha = 3 and beta = inf. The value for MIN is updated
+using the value of the left-most node, which is 3. Beta is now 3, and
+alpha is 3.
+
+\includegraphics{img/ABExample11.png}
+
+Move up one level in the tree to the MIN node and set beta = 3. At this
+point in the algorithm, alpha = beta = 3. The remainder of the tree can
+be pruned because MIN won't select a value greater than 3, and MAX at
+the root, won't select a value less than 3. The search completes with a
+minimax value of 3.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{img/ABExample12.png}
+\caption{png}
+\end{figure}
+
     \section{Simulated Annealing}\label{simulated-annealing}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{def} \NormalTok{simulated_annealing(g):}
+    \NormalTok{s, c }\OperatorTok{=} \NormalTok{generate_solution(g)}
+    \NormalTok{T }\OperatorTok{=} \DecValTok{1}
+    \NormalTok{Tmin }\OperatorTok{=} \FloatTok{1e-9}
+    \NormalTok{alpha }\OperatorTok{=} \FloatTok{0.99}
+    \NormalTok{k }\OperatorTok{=} \DecValTok{1}
+    \NormalTok{i }\OperatorTok{=} \DecValTok{0}
+    \ControlFlowTok{while} \NormalTok{T }\OperatorTok{>} \NormalTok{Tmin:}
+        \NormalTok{sp, cp }\OperatorTok{=} \NormalTok{generate_solution_neighbor(g, s, c)}
+        \NormalTok{DE }\OperatorTok{=} \NormalTok{cp }\OperatorTok{-} \NormalTok{c}
+        \CommentTok{# print(s, c, math.exp(-DE / (k * T)))}
+        \ControlFlowTok{if} \NormalTok{DE }\OperatorTok{<} \DecValTok{0}\NormalTok{:}
+            \NormalTok{s }\OperatorTok{=} \NormalTok{sp}
+            \NormalTok{c }\OperatorTok{=} \NormalTok{cp}
+        \ControlFlowTok{elif} \NormalTok{random.random() }\OperatorTok{<} \NormalTok{math.exp(}\OperatorTok{-}\NormalTok{DE }\OperatorTok{/} \NormalTok{(k }\OperatorTok{*} \NormalTok{T)):}
+            \NormalTok{s }\OperatorTok{=} \NormalTok{sp}
+            \NormalTok{c }\OperatorTok{=} \NormalTok{cp}
+        \NormalTok{T }\OperatorTok{*=} \NormalTok{alpha}
+        \NormalTok{i }\OperatorTok{+=} \DecValTok{1}
+    \BuiltInTok{print}\NormalTok{(s, c, i)}
+\end{Highlighting}
+\end{Shaded}
+
     \section{Genetic Algorithms}\label{genetic-algorithms}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#!/usr/bin/env python3.5}
+
+\ImportTok{import} \NormalTok{sys}
+\ImportTok{import} \NormalTok{random}
+\ImportTok{import} \NormalTok{itertools}
+
+\NormalTok{item_count }\OperatorTok{=} \DecValTok{10}
+\NormalTok{weight_limit }\OperatorTok{=} \DecValTok{50}
+
+\CommentTok{# weight, value}
+\NormalTok{items }\OperatorTok{=} \NormalTok{[(random.randint(}\DecValTok{1}\NormalTok{, }\DecValTok{15}\NormalTok{), random.randint(}\DecValTok{1}\NormalTok{, }\DecValTok{10}\NormalTok{))}
+         \ControlFlowTok{for} \NormalTok{_ }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(item_count)]}
+\BuiltInTok{print}\NormalTok{(items)}
+\BuiltInTok{print}\NormalTok{(}\StringTok{'==='}\NormalTok{)}
+
+\NormalTok{solutions }\OperatorTok{=} \NormalTok{[}\StringTok{''}\NormalTok{.join([}\BuiltInTok{str}\NormalTok{(random.randint(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+             \ControlFlowTok{for} \NormalTok{i }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\BuiltInTok{len}\NormalTok{(items))])}
+             \ControlFlowTok{for} \NormalTok{j }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{3}\NormalTok{)]}
+
+\KeywordTok{def} \NormalTok{fitness(items, choices):}
+    \NormalTok{weight }\OperatorTok{=} \DecValTok{0}
+    \NormalTok{value }\OperatorTok{=} \DecValTok{0}
+    \ControlFlowTok{for} \NormalTok{choice, item }\KeywordTok{in} \BuiltInTok{zip}\NormalTok{(choices, items):}
+        \ControlFlowTok{if} \NormalTok{choice }\OperatorTok{==} \StringTok{'1'}\NormalTok{:}
+            \NormalTok{weight }\OperatorTok{+=} \NormalTok{item[}\DecValTok{0}\NormalTok{]}
+            \NormalTok{value }\OperatorTok{+=} \NormalTok{item[}\DecValTok{1}\NormalTok{]}
+    \ControlFlowTok{if} \NormalTok{weight }\OperatorTok{>} \NormalTok{weight_limit:}
+        \ControlFlowTok{return} \DecValTok{0}
+    \ControlFlowTok{else}\NormalTok{:}
+        \ControlFlowTok{return} \NormalTok{value}
+
+\KeywordTok{def} \NormalTok{combine(choice1, choice2):}
+    \CommentTok{# i = random.randint(1, item_count - 1)}
+    \NormalTok{i }\OperatorTok{=} \BuiltInTok{int}\NormalTok{(item_count }\OperatorTok{/} \DecValTok{2}\NormalTok{)}
+    \CommentTok{# Randomly combine}
+    \ControlFlowTok{if} \NormalTok{random.random() }\OperatorTok{<} \NormalTok{.}\DecValTok{5}\NormalTok{:}
+        \NormalTok{new_solution }\OperatorTok{=} \NormalTok{choice1[:i] }\OperatorTok{+} \NormalTok{choice2[i:]}
+    \ControlFlowTok{else}\NormalTok{:}
+        \NormalTok{new_solution }\OperatorTok{=} \NormalTok{choice2[:i] }\OperatorTok{+} \NormalTok{choice1[i:]}
+    \CommentTok{# 10% of time mutate}
+    \ControlFlowTok{if} \NormalTok{random.random() }\OperatorTok{<} \NormalTok{.}\DecValTok{1}\NormalTok{:}
+        \NormalTok{new_solution }\OperatorTok{=} \BuiltInTok{list}\NormalTok{(new_solution)}
+        \NormalTok{j }\OperatorTok{=} \NormalTok{random.randint(}\DecValTok{0}\NormalTok{, item_count }\OperatorTok{-} \DecValTok{1}\NormalTok{)}
+        \ControlFlowTok{if} \NormalTok{new_solution[j] }\OperatorTok{==} \StringTok{'0'}\NormalTok{:}
+            \NormalTok{new_solution[j] }\OperatorTok{=} \StringTok{'1'}
+        \ControlFlowTok{else}\NormalTok{:}
+            \NormalTok{new_solution[j] }\OperatorTok{=} \StringTok{'0'}
+        \NormalTok{new_solution }\OperatorTok{=} \StringTok{''}\NormalTok{.join(new_solution)}
+    \ControlFlowTok{return} \NormalTok{new_solution}
+
+\KeywordTok{def} \NormalTok{gen_new(top3):}
+    \NormalTok{sols }\OperatorTok{=} \NormalTok{[]}
+    \ControlFlowTok{for} \NormalTok{_ }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{10}\NormalTok{):}
+        \NormalTok{perms }\OperatorTok{=} \BuiltInTok{list}\NormalTok{(itertools.permutations(top3))}
+        \NormalTok{random.shuffle(perms)}
+        \NormalTok{i, j }\OperatorTok{=} \NormalTok{perms[}\DecValTok{0}\NormalTok{][:}\DecValTok{2}\NormalTok{]}
+        \NormalTok{sols.append(combine(i, j))}
+    \ControlFlowTok{return} \NormalTok{sols}
+
+\KeywordTok{def} \NormalTok{get_top3(sols):}
+    \ControlFlowTok{return} \NormalTok{[s }\ControlFlowTok{for} \NormalTok{s, v }\KeywordTok{in} \BuiltInTok{sorted}\NormalTok{(get_value(sols),}
+            \NormalTok{key}\OperatorTok{=}\KeywordTok{lambda} \NormalTok{tup: }\OperatorTok{-}\NormalTok{tup[}\DecValTok{1}\NormalTok{])[:}\DecValTok{3}\NormalTok{]]}
+
+\KeywordTok{def} \NormalTok{get_value(sols):}
+    \ControlFlowTok{return} \NormalTok{[(item, fitness(items, item)) }\ControlFlowTok{for} \NormalTok{item }\KeywordTok{in} \NormalTok{sols]}
+
+\ControlFlowTok{for} \NormalTok{i }\KeywordTok{in} \BuiltInTok{range}\NormalTok{(}\DecValTok{10}\NormalTok{):}
+    \BuiltInTok{print}\NormalTok{(}\StringTok{'Starting with }\SpecialCharTok{\{\}}\StringTok{'}\NormalTok{.}\BuiltInTok{format}\NormalTok{(}\BuiltInTok{str}\NormalTok{(get_value(solutions))))}
+    \NormalTok{new_solutions }\OperatorTok{=} \NormalTok{gen_new(solutions)}
+    \BuiltInTok{print}\NormalTok{(}\StringTok{'Birthed }\SpecialCharTok{\{\}}\StringTok{'}\NormalTok{.}\BuiltInTok{format}\NormalTok{(}\BuiltInTok{str}\NormalTok{(get_value(new_solutions))))}
+    \NormalTok{full_solutions }\OperatorTok{=} \NormalTok{solutions }\OperatorTok{+} \NormalTok{new_solutions}
+    \NormalTok{solutions }\OperatorTok{=} \NormalTok{get_top3(full_solutions)}
+    \BuiltInTok{print}\NormalTok{(}\StringTok{'Evolved to }\SpecialCharTok{\{\}}\StringTok{'}\NormalTok{.}\BuiltInTok{format}\NormalTok{(}\BuiltInTok{str}\NormalTok{(get_value(solutions))))}
+    \BuiltInTok{print}\NormalTok{(}\StringTok{'---'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor} }]:} 
