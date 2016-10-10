@@ -5,6 +5,30 @@ tags: homework, ai, python, numerics
 Author: Will Farmer
 Summary: How to generate solutions of hard problems with simulations.
 
+# Table of Contents
+
+2. [An Introduction to Simulated Annealing and Genetic Algorithms](#An-Introduction-to-Simulated-Annealing-and-Gene
+tic-Algorithms)
+    3. [What is a "Fitness Function"?](#What-is-a-"Fitness-Function"?)
+    4. [What is Simulated Annealing?](#What-is-Simulated-Annealing?)
+    5. [What are Genetic Algorithms?](#What-are-Genetic-Algorithms?)
+6. [Drawing Political District Boundaries](#Drawing-Political-District-Boundaries)
+    7. [Procedure](#Procedure)
+        8. [Overall Structure](#Overall-Structure)
+            9. [Some Quick Notes](#Some-Quick-Notes)
+        10. [Helpful Code](#Helpful-Code)
+            11. [Finding Neighbors of a Point](#Finding-Neighbors-of-a-Point)
+            12. [Determining if a District is Valid](#Determining-if-a-District-is-Valid)
+            13. [Finding District Neighbors](#Finding-District-Neighbors)
+            14. [Fitness Function](#Fitness-Function)
+        15. [Generating Random Solutions](#Generating-Random-Solutions)
+        16. [Simulated Annealing](#Simulated-Annealing)
+            17. [Mutations](#Mutations)
+            18. [A Better Starting Point](#A-Better-Starting-Point)
+        19. [Genetic Algorithm](#Genetic-Algorithm)
+            20. [Combining Solutions](#Combining-Solutions)
+21. [Using Provided Code](#Using-Provided-Code)
+
 # An Introduction to Simulated Annealing and Genetic Algorithms
 
 [Simulated Annealing](https://en.wikipedia.org/wiki/Simulated_annealing) and
@@ -709,3 +733,50 @@ Which can be visualized as follows.
 
 ![png](./img/combine.png)
 
+# Using Provided Code
+
+If you're a TA, this is straightforward! Just run
+
+```bash
+python ./willfarmer_hw5.py $FILE_TO_RUN
+```
+
+This will work for either python 2 or python 3.
+
+If you want to dig a little deeper, use the `-h` flag to see what it can do,
+which is in a nutshell the following.
+
+* Use Simulated Annealing on the file
+* Use the Genetic Algorithm on the file
+* Set the number of districts for either solution type
+* Set the precision (number of runs) for either algorithm
+* Animate the solution process
+* Create gifs of the solution process (otherwise just `.mp4`)
+* Generate report (`README.md`) assets.
+* Do all of the above in one go.
+
+```bash
+┬─[william@fillory:~/Dropbox/classwork/2016b/csci3202/hw5]
+╰─>$ ./willfarmer_hw5.py -h
+usage: willfarmer_hw5.py [-h] [-a] [-g] [-n NUMDISTRICTS] [-z] [-p PRECISION]
+                         [-r] [-j] [-F]
+                         F
+
+positional arguments:
+  F                     File to load
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -a, --annealing       Use Simulated Annealing Algorithm?
+  -g, --genetic         Use Genetic Algorithm?
+  -n NUMDISTRICTS, --numdistricts NUMDISTRICTS
+                        Number of districts to form. Defaults to the width of
+                        the system
+  -z, --animate         Animate algorithms?
+  -p PRECISION, --precision PRECISION
+                        Tweak precision, lower is less. In a nutshell, how
+                        many loops to run.
+  -r, --report          Generate all assets for the report
+  -j, --gif             Generate gif versions of animations?
+  -F, --full            Generate everything. Report assets, SA, and GA.
+```
