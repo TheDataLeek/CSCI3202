@@ -244,12 +244,15 @@ def generate_report_assets(system, numdistricts, precision, makegif):
             .write_gif(os.path.join(OUTDIR, filename + '.gif'))
 
     # Now show the difference in k for simulated annealing
-    plt.figure(figsize=FIGSIZE)
+    plt.figure(figsize=(6, 6))
     Tvals = np.arange(1, 1e-12, -1.0 / precision)
     dv = -1
     determine_k = lambda T, k: np.exp(dv / (k * T))
     for k in np.linspace(0.01, 1, 100):
-        plt.plot(Tvals, determine_k(Tvals, k))
+        plt.plot(Tvals[::-1], determine_k(Tvals, k))
+    plt.xlabel('Algorithm Iteration')
+    plt.ylabel('Chance of Accepting')
+    plt.title(r'Effect of Differing $k$')
     plt.savefig(os.path.join(OUTDIR, 'kvals.png'))
 
 

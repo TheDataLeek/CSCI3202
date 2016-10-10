@@ -5,8 +5,13 @@ tags: homework, ai, python, numerics
 Author: Will Farmer
 Summary: How to generate solutions of hard problems with simulations.
 
-[Available on GitHub](https://github.com/willzfarmer/CSCI3202/tree/master/hw5),
-or [my personal website](www.will-farmer.com).
+In this writeup we'll discuss two algorithms, simulated annealing and genetic
+algorithms, and show how they can be applied to the problem of drawing political
+boundaries while avoiding gerrymandering.
+
+This writeup is [available on
+GitHub](https://github.com/willzfarmer/CSCI3202/tree/master/hw5), or [my
+personal website](www.will-farmer.com).
 
 # Table of Contents
 
@@ -34,6 +39,8 @@ tic-algorithms)
 22. [Using Provided Code](#using-provided-code)
 
 # An Introduction to Simulated Annealing and Genetic Algorithms
+
+First let's talk about our algorithms.
 
 [Simulated Annealing](https://en.wikipedia.org/wiki/Simulated_annealing) and
 [Genetic Algorithms](https://en.wikipedia.org/wiki/Genetic_algorithm) are both
@@ -376,16 +383,35 @@ class Solution(object):
 
 #### Fitness Function
 
-Both of these methods rely on our heuristic, our "fitness function", being
-accurate and reliable. The final fitness function that we use emphasizes the
-following qualities in its assessment.
+Taking a step back from the code and considering the real world, let's think
+about what we'd ideally like to emphasize in a political system.
+
+* We'd want districts to be homogeneous, i.e. each district is comprised of
+  either all Republican or all Democrat voters.
+* We want our district ratios to approximately match our population ratios. By
+  this I mean, if we have 52% Republican voters in the general population, 52%
+  of the districts should have a Republican majority, and vice-versa for the
+  Democrat population.
+* We'd want to avoid
+  [gerrymandering](https://en.wikipedia.org/wiki/Gerrymandering), which is the
+  practice of shaping voting districts such that a certain political party has
+  an unfair advantage. A real world example of the sort of district we'd like to
+  avoid looks like this (which is in Texas)
+  ![jpg](./img/gerrymandering_example.jpg)
+* We want all districts to be around the same population size, i.e. there are an
+  equal number (within reason) of voters in each district.
+
+We can design our fitness function to meet these criteria. The final fitness
+function that we use emphasizes the following qualities in its assessment.
 
 1. Validity of solution
 2. Make sure the ratio of `R` to `D` majority districts matches the ratio of `R`
    to `D` in the general population.
 3. Make sure each district is as homogeneous as possible
 4. Reduce the value of the district if its size isn't close to the "ideal size",
-   which is `total_size / num_districts`.
+   which is `total_size / num_districts`. This is our attempt to reduce the
+   "squiggliness" of a district, however it's not perfect and squiggly districts
+   still pop up.
 
 ```python
 class Solution(object):
