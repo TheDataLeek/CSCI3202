@@ -139,7 +139,74 @@ The structure is as follows:
   abstraction.
 
 ```python
- TODO
+▼ Mask : class
+   +__init__ : function
+   -__str__ : function
+  ▼+get_labels : function
+     +unlabelled : function
+   +is_valid : function
+   +location : function
+   +make_valid : function
+   +overlap : function
+   +parse_list : function
+   +parse_locations : function
+   +size : function
+
+▼ Solution : class
+   -__eq__ : function
+   -__getitem__ : function
+   +__init__ : function
+   -__ne__ : function
+   -__str__ : function
+   +combine : function
+   +copy : function
+   +fill : function
+   +generate_random_solution : function
+   +get_district_neighbors : function
+   +get_filtered_district_neighbors : function
+   +get_full_openspots : function
+   +get_neighbors : function
+   +get_random_openspot : function
+   +get_solution : function
+   +height : function
+   +is_valid : function
+   +majorities : function
+   +majority : function
+   +mutate : function
+   +show : function
+   +summary : function
+   +value : function
+   +width : function
+
+▼ System : class
+   -__getitem__ : function
+   +__init__ : function
+   +_name_arr : function
+   +_read_file : function
+   +empty_state : function
+   +height : function
+   +stats : function
+   +width : function
+
+▼+animate_history : function
+   +update_plot : function
+
+▼+generate_report_assets : function
+   +update : function
+
+ +genetic_algorithm : function
+
+ +get_args : function
+
+ +get_good_start : function
+
+ +main : function
+
+ +simulated_annealing : function
+
+▼ variables
+    FIGSIZE
+    OUTDIR
 ```
 
 So basically how this works is we read in the file, creating a `System`
@@ -423,7 +490,6 @@ def simulated_annealing(system, numdistricts, precision, animate, makegif):
     for i, T in tqdm(enumerate(Tvals), total=len(Tvals)):
         new_solution = solution.copy()  # copy our current solution
         new_solution.mutate()  # Mutate the copy
-        # TODO: Speed this up by keeping current value
         dv = new_solution.value - solution.value  # Look at delta of values
         # If it's better, or random chance, we accept it
         if dv > 0 or random.random() < math.exp(dv / (k * T)):
