@@ -5,14 +5,17 @@ tags: homework, ai, python, numerics
 Author: Will Farmer
 Summary: How to generate solutions of hard problems with simulations.
 
+[Available on GitHub](https://github.com/willzfarmer/CSCI3202/tree/master/hw5),
+or [my personal website](www.will-farmer.com).
+
 # Table of Contents
 
 2. [Table of Contents](#table-of-contents)
 3. [An Introduction to Simulated Annealing and Genetic Algorithms](#an-introduction-to-simulated-annealing-and-gene
 tic-algorithms)
-    4. [What is a Fitness Function?](#what-is-a-fitness-function?)
-    5. [What is Simulated Annealing?](#what-is-simulated-annealing?)
-    6. [What are Genetic Algorithms?](#what-are-genetic-algorithms?)
+    4. [What is a Fitness Function?](#what-is-a-fitness-function)
+    5. [What is Simulated Annealing?](#what-is-simulated-annealing)
+    6. [What are Genetic Algorithms?](#what-are-genetic-algorithms)
 7. [Drawing Political District Boundaries](#drawing-political-district-boundaries)
     8. [Procedure](#procedure)
         9. [Overall Structure](#overall-structure)
