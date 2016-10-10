@@ -10,7 +10,7 @@ Summary: How to generate solutions of hard problems with simulations.
 2. [Table of Contents](#table-of-contents)
 3. [An Introduction to Simulated Annealing and Genetic Algorithms](#an-introduction-to-simulated-annealing-and-gene
 tic-algorithms)
-    4. [What is a "Fitness Function"?](#what-is-a-"fitness-function"?)
+    4. [What is a Fitness Function?](#what-is-a-fitness-function?)
     5. [What is Simulated Annealing?](#what-is-simulated-annealing?)
     6. [What are Genetic Algorithms?](#what-are-genetic-algorithms?)
 7. [Drawing Political District Boundaries](#drawing-political-district-boundaries)
@@ -42,7 +42,7 @@ The benefit of these algorithms is that we can relatively quickly approximate a
 good solution without much computation time. Our solution won't be "the best"
 unless we get extraordinarily lucky, however it will be a good approximation.
 
-## What is a "Fitness Function"?
+## What is a Fitness Function?
 
 Let's look at what [the wikipedia
 page](https://en.wikipedia.org/wiki/Fitness_function) says on the matter.
