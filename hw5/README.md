@@ -11,7 +11,7 @@ boundaries while avoiding gerrymandering.
 
 This writeup is [available on
 GitHub](https://github.com/willzfarmer/CSCI3202/tree/master/hw5), or [my
-personal website](www.will-farmer.com).
+personal website](http://www.will-farmer.com).
 
 # Table of Contents
 
@@ -37,6 +37,7 @@ tic-algorithms)
         20. [Genetic Algorithm](#genetic-algorithm)
             21. [Combining Solutions](#combining-solutions)
 22. [Using Provided Code](#using-provided-code)
+23. [Next Steps](#next-steps)
 
 # An Introduction to Simulated Annealing and Genetic Algorithms
 
@@ -250,6 +251,12 @@ changes.
 
 #### Some Quick Notes
 
+* There's a lot of code here, and to be honest, it's more than is really
+  necessary. The reason for it however, is so that I can abstract away the
+  more complicated parts and just say something like `solution.mutate()` instead
+  of digging into how or why the mutation algorithm works. This abstraction is
+  why the code to do simulated annealing is so terse, abstraction makes
+  algorithms terse.
 * All indexing starts from the upper left point, which is at `(0, 0)`, and all
   indices are `(y, x)` pairs.
 * There's a hierarchy of the code, our system is represented by a `System`
@@ -384,7 +391,7 @@ class Solution(object):
 #### Fitness Function
 
 Taking a step back from the code and considering the real world, let's think
-about what we'd ideally like to emphasize in a political system.
+about what we'd ideally like to emphasize in a political districting system.
 
 * We'd want districts to be homogeneous, i.e. each district is comprised of
   either all Republican or all Democrat voters.
@@ -810,3 +817,14 @@ optional arguments:
   -j, --gif             Generate gif versions of animations?
   -F, --full            Generate everything. Report assets, SA, and GA.
 ```
+
+# Next Steps
+
+So this is neat project. I want to do more, but I'm limited in the time I have.
+I do have a couple of ideas for next steps however.
+
+* Parallelizing - Instead of just running simulations on a single thread, we
+  could theoretically spin up a bunch of different threads and run simulations
+  on them simultaneously, only keeping the best of all trials.
+* Real Data - It would be amazing to take the approaches used in this writeup
+  and apply it to real-world political data. A topic for a different blog post!
