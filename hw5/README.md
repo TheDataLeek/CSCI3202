@@ -62,14 +62,14 @@ page](https://en.wikipedia.org/wiki/Fitness_function) says on the matter.
 > summarise, as a single figure of merit, how close a given design solution is
 > to achieving the set aims.
 
-So in a nutshell, it's a single number that basically tells us how "good" of a
+In other words, it's a single number that basically tells us how "good" of a
 solution we have. For our genetic algorithm and simulated annealing approach
 we'll want to maximize this number, thereby maximizing how "good" our solutions
 are.
 
 ## What is Simulated Annealing?
 
-In a nutshell, simulated annealing can be defined as follows.
+Simulated annealing can be defined as follows.
 
 1. Generate a random solution
 2. Generate a "neighboring solution" to our generated solution
@@ -780,8 +780,8 @@ python ./willfarmer_hw5.py $FILE_TO_RUN
 
 This will work for either python 2 or python 3.
 
-If you want to dig a little deeper, use the `-h` flag to see what it can do,
-which is in a nutshell the following.
+If you want to dig a little deeper, use the `-h` flag to see what it can do, but
+here's a short list as well.
 
 * Use Simulated Annealing on the file
 * Use the Genetic Algorithm on the file
