@@ -77,7 +77,7 @@ def simulated_annealing(system, numdistricts, precision, animate, makegif):
     """
     solution = get_good_start(system, numdistricts)
     history = [solution]  # Keep track of our history
-    k = 0.8  # Larger k => more chance of randomly accepting
+    k = 0.25  # Larger k => more chance of randomly accepting
     Tvals = np.arange(1, 1e-12, -1.0 / precision)
     print('Running Simulated Annealing with k={:0.03f}, alpha={:0.05f}'\
             .format(k, 1.0 / precision))
@@ -272,13 +272,13 @@ def animate_history(filename, systemdata, history, numdistricts, makegif, algo_n
                           cmap=plt.get_cmap('gnuplot'),
                           vmin=0,
                           vmax=numdistricts)
-    axarr[1].set_title('value {}'.format(history[0].value))
+    axarr[1].set_title('value {:0.03f}'.format(history[0].value))
     axarr[1].axis('off')
 
     def update_plot(i):
         """Animation loop"""
         sol.set_data(history[i].full_mask)
-        axarr[1].set_title('value {}'.format(history[i].value))
+        axarr[1].set_title('value {:0.03f}'.format(history[i].value))
         plt.suptitle('Solution {}'.format(i))
         return sol,
 
@@ -481,13 +481,15 @@ class Solution(object):
             else:
                 # District value is simply abs(num_red - num_blue)
                 subvalue = np.abs(len(values[values == 0]) - len(values[values == 1]))
-                size_bonus = np.abs(len(values) - district_size)
+                size_bonus = 0.25 * np.abs(len(values) - district_size)
                 if subvalue < len(values):
                     # For any non-uniform values, add 10% their value to account
                     # for independent voter turnout
                     subvalue += (len(values) - subvalue) * 0.1
                 value += subvalue
                 value -= size_bonus
+                # Minimize neighbors (same as minimizing edge length)
+                value += -0.1 * len(self.get_district_neighbors(i))
         return value
 
     def get_solution(self, i):

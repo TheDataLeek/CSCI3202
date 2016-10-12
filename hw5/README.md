@@ -423,6 +423,8 @@ function that we use emphasizes the following qualities in its assessment.
    aren't affiliated with the majority party might be swayed by targeted
    campaigns. To this effect we account each non-affiliated "zone" with a weight
    of -0.9 instead of -1.
+6. Finally, we can also minimize edge length as well as trying to keep each
+   district the same size. This will result in hopefully ideal districts
 
 ```python
 class Solution(object):
@@ -450,13 +452,15 @@ class Solution(object):
             else:
                 # District value is simply abs(num_red - num_blue)
                 subvalue = np.abs(len(values[values == 0]) - len(values[values == 1]))
-                size_bonus = np.abs(len(values) - district_size)
+                size_bonus = 0.25 * np.abs(len(values) - district_size)
                 if subvalue < len(values):
                     # For any non-uniform values, add 10% their value to account
                     # for independent voter turnout
                     subvalue += (len(values) - subvalue) * 0.1
                 value += subvalue
                 value -= size_bonus
+                # Minimize neighbors (same as minimizing edge length)
+                value += -0.1 * len(self.get_district_neighbors(i))
         return value
 
 ...
