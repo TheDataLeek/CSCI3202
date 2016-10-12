@@ -419,6 +419,10 @@ function that we use emphasizes the following qualities in its assessment.
    which is `total_size / num_districts`. This is our attempt to reduce the
    "squiggliness" of a district, however it's not perfect and squiggly districts
    still pop up.
+5. We also take into account that in non-homogeneous districts voters that
+   aren't affiliated with the majority party might be swayed by targeted
+   campaigns. To this effect we account each non-affiliated "zone" with a weight
+   of -0.9 instead of -1.
 
 ```python
 class Solution(object):
@@ -770,9 +774,28 @@ Which can be visualized as follows.
 
 ![png](./img/combine.png)
 
+# Final Thoughts
+
+Both of these approaches can be applied to solve incredibly complex problems
+with varying degrees of success, and much of their success hinges on how
+effective your evaluation of a given solution fitness' is. 
+
+We also realize that any given "final solution" is somewhat unique, or at the
+very least hard to obtain again. If we visualize our solution space as a
+two-dimensional plane, with each solution having some value
+
+![png](https://upload.wikimedia.org/wikipedia/commons/b/b7/Three-dimensional_graph.png)
+
+Then a final solution that we find is merely one of these peaks, so a re-run
+will not necessarily yield the same solution again.
+
+To get around this, we could theoretically run the code thousands of times, with
+different seeds each time, and then pick the best out of all runs.
+
 # Using Provided Code
 
-If you're a TA, this is straightforward! Just run
+If you're a TA, this is straightforward! After installed the required libraries
+(again check [the repository](https://github.com/willzfarmer/CSCI3202)) just run
 
 ```bash
 python ./willfarmer_hw5.py $FILE_TO_RUN
@@ -820,8 +843,8 @@ optional arguments:
 
 # Next Steps
 
-So this is neat project. I want to do more, but I'm limited in the time I have.
-I do have a couple of ideas for next steps however.
+I want to do more for this project but I'm limited in the time I have. I do have
+a couple of ideas for next steps however.
 
 * Parallelizing - Instead of just running simulations on a single thread, we
   could theoretically spin up a bunch of different threads and run simulations
