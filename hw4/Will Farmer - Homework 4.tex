@@ -275,6 +275,17 @@
     
 
     
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}39}]:} \PY{k+kn}{import} \PY{n+nn}{sympy} \PY{k}{as} \PY{n+nn}{sp}
+         \PY{k+kn}{from} \PY{n+nn}{sympy} \PY{k}{import} \PY{n}{symbols}
+         \PY{k+kn}{import} \PY{n+nn}{networkx} \PY{k}{as} \PY{n+nn}{nx}
+         \PY{k+kn}{from} \PY{n+nn}{math} \PY{k}{import} \PY{n}{inf}
+         
+         \PY{n}{sp}\PY{o}{.}\PY{n}{init\PYZus{}printing}\PY{p}{(}\PY{p}{)}
+         
+         \PY{o}{\PYZpc{}}\PY{k}{matplotlib} inline
+\end{Verbatim}
+
     \section{Problem 1}\label{problem-1}
 
 \textbf{Use the \(\alpha-\beta\) algorithm to show the minimax value to
@@ -289,13 +300,13 @@ pruned during the search, and the values for \texttt{MAX} and
 \texttt{\color{outcolor}Out[{\color{outcolor}2}]:}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_1_0.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_2_0.png}
     \end{center}
     { \hspace*{\fill} \\}
     
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}45}]:} \PY{n}{inf} \PY{o}{=} \PY{l+m+mi}{1}\PY{n}{e12}
+{\color{incolor}In [{\color{incolor}83}]:} \PY{n}{names} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{A}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
          
          \PY{k}{class} \PY{n+nc}{Node}\PY{p}{(}\PY{n+nb}{object}\PY{p}{)}\PY{p}{:}
              \PY{k}{def} \PY{n+nf}{\PYZus{}\PYZus{}init\PYZus{}\PYZus{}}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{state}\PY{p}{,} \PY{n}{value}\PY{o}{=}\PY{k+kc}{None}\PY{p}{)}\PY{p}{:}
@@ -306,6 +317,7 @@ pruned during the search, and the values for \texttt{MAX} and
                  \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{left} \PY{o}{=} \PY{k+kc}{None}
                  \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{right} \PY{o}{=} \PY{k+kc}{None}
                  \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{pruned} \PY{o}{=} \PY{k+kc}{False}
+                 \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{\PYZus{}name} \PY{o}{=} \PY{k+kc}{None}
                  
              \PY{n+nd}{@property}
              \PY{k}{def} \PY{n+nf}{is\PYZus{}empty}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
@@ -314,16 +326,58 @@ pruned during the search, and the values for \texttt{MAX} and
              \PY{n+nd}{@property}
              \PY{k}{def} \PY{n+nf}{children}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
                  \PY{k}{return} \PY{p}{[}\PY{n}{x} \PY{k}{for} \PY{n}{x} \PY{o+ow}{in} \PY{p}{[}\PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{left}\PY{p}{,} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{right}\PY{p}{]} \PY{k}{if} \PY{n}{x} \PY{o+ow}{is} \PY{o+ow}{not} \PY{k+kc}{None}\PY{p}{]}
+             
+             \PY{n+nd}{@property}
+             \PY{k}{def} \PY{n+nf}{name}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+                 \PY{k}{global} \PY{n}{names}
+                 \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{\PYZus{}name} \PY{o+ow}{is} \PY{k+kc}{None}\PY{p}{:}
+                     \PY{n}{n} \PY{o}{=} \PY{n+nb}{chr}\PY{p}{(}\PY{n+nb}{ord}\PY{p}{(}\PY{n}{names}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}
+                     \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{\PYZus{}name} \PY{o}{=} \PY{n}{n}
+                     \PY{n}{names}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{n}\PY{p}{)}
+                 \PY{k}{return} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{\PYZus{}name}
                  
              \PY{k}{def} \PY{n+nf}{\PYZus{}\PYZus{}str\PYZus{}\PYZus{}}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
                  \PY{k}{if} \PY{o+ow}{not} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{pruned}\PY{p}{:}
-                     \PY{k}{return} \PY{p}{(}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{(}\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{ \PYZhy{} }\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{)}\PY{l+s+s1}{\PYZsq{}} \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{state} \PY{o}{==} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MIN}\PY{l+s+s1}{\PYZsq{}} \PY{k}{else} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{[}\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{ \PYZhy{} }\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{]}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{o}{.}\PY{n}{format}\PY{p}{(}
-                             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}inf}\PY{l+s+s1}{\PYZsq{}} \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{alpha} \PY{o}{==} \PY{o}{\PYZhy{}}\PY{n}{inf} \PY{k}{else} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{alpha}\PY{p}{,}
-                             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{inf}\PY{l+s+s1}{\PYZsq{}} \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{beta} \PY{o}{==} \PY{n}{inf} \PY{k}{else} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{beta}\PY{p}{)} \PY{o}{+}
-                         \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}} \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{is\PYZus{}empty} \PY{k}{else} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ \PYZhy{} \PYZlt{}}\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{\PYZgt{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{, }\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{p}{[}\PY{n+nb}{str}\PY{p}{(}\PY{n}{x}\PY{p}{)} \PY{k}{for} \PY{n}{x} \PY{o+ow}{in} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{children}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+                     \PY{k}{return} \PY{p}{(}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{(}\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{ , }\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{)}\PY{l+s+s1}{\PYZsq{}} \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{state} \PY{o}{==} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MIN}\PY{l+s+s1}{\PYZsq{}} \PY{k}{else} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{[}\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{ , }\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{]}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{o}{.}\PY{n}{format}\PY{p}{(}
+                             \PY{o}{\PYZhy{}}\PY{n}{sp}\PY{o}{.}\PY{n}{oo} \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{alpha} \PY{o}{==} \PY{o}{\PYZhy{}}\PY{n}{inf} \PY{k}{else} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{alpha}\PY{p}{,}
+                             \PY{n}{sp}\PY{o}{.}\PY{n}{oo} \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{beta} \PY{o}{==} \PY{n}{inf} \PY{k}{else} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{beta}\PY{p}{)} \PY{o}{+}
+                         \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}} \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{is\PYZus{}empty} \PY{k}{else} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ , \PYZlt{}}\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{\PYZgt{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{, }\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{p}{[}\PY{n+nb}{str}\PY{p}{(}\PY{n}{x}\PY{p}{)} \PY{k}{for} \PY{n}{x} \PY{o+ow}{in} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{children}\PY{p}{]}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{)}
                  \PY{k}{else}\PY{p}{:}
                      \PY{k}{return} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}
-         
+                 
+             \PY{k}{def} \PY{n+nf}{nx}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{g} \PY{o}{=} \PY{n}{nx}\PY{o}{.}\PY{n}{DiGraph}\PY{p}{(}\PY{p}{)}
+                 \PY{n}{nodes} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+                 \PY{n}{edges} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+                 \PY{k}{def} \PY{n+nf}{add}\PY{p}{(}\PY{n}{cnode}\PY{p}{)}\PY{p}{:}
+                     \PY{k}{if} \PY{n}{cnode}\PY{o}{.}\PY{n}{left} \PY{o+ow}{and} \PY{o+ow}{not} \PY{n}{cnode}\PY{o}{.}\PY{n}{left}\PY{o}{.}\PY{n}{pruned}\PY{p}{:}
+                         \PY{n}{nodes}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{p}{(}\PY{n}{cnode}\PY{o}{.}\PY{n}{left}\PY{o}{.}\PY{n}{name}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{left}\PY{o}{.}\PY{n}{alpha}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{left}\PY{o}{.}\PY{n}{beta}\PY{p}{)}\PY{p}{)}
+                         \PY{n}{edges}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{p}{(}\PY{p}{(}\PY{n}{cnode}\PY{o}{.}\PY{n}{name}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{alpha}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{beta}\PY{p}{)}\PY{p}{,}
+                                       \PY{p}{(}\PY{n}{cnode}\PY{o}{.}\PY{n}{left}\PY{o}{.}\PY{n}{name}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{left}\PY{o}{.}\PY{n}{alpha}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{left}\PY{o}{.}\PY{n}{beta}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+                         \PY{n}{add}\PY{p}{(}\PY{n}{cnode}\PY{o}{.}\PY{n}{left}\PY{p}{)}
+                     \PY{k}{if} \PY{n}{cnode}\PY{o}{.}\PY{n}{right} \PY{o+ow}{and} \PY{o+ow}{not} \PY{n}{cnode}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{pruned}\PY{p}{:}
+                         \PY{n}{nodes}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{p}{(}\PY{n}{cnode}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{name}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{alpha}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{beta}\PY{p}{)}\PY{p}{)}
+                         \PY{n}{edges}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{p}{(}\PY{p}{(}\PY{n}{cnode}\PY{o}{.}\PY{n}{name}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{alpha}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{beta}\PY{p}{)}\PY{p}{,}
+                                       \PY{p}{(}\PY{n}{cnode}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{name}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{alpha}\PY{p}{,} \PY{n}{cnode}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{beta}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+                         \PY{n}{add}\PY{p}{(}\PY{n}{cnode}\PY{o}{.}\PY{n}{right}\PY{p}{)}
+                 \PY{n}{g}\PY{o}{.}\PY{n}{add\PYZus{}node}\PY{p}{(}\PY{p}{(}\PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{name}\PY{p}{,} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{alpha}\PY{p}{,} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{beta}\PY{p}{)}\PY{p}{)}
+                 \PY{n}{add}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}
+                 \PY{n}{g}\PY{o}{.}\PY{n}{add\PYZus{}nodes\PYZus{}from}\PY{p}{(}\PY{n}{nodes}\PY{p}{)}
+                 \PY{n}{g}\PY{o}{.}\PY{n}{add\PYZus{}edges\PYZus{}from}\PY{p}{(}\PY{n}{edges}\PY{p}{)}
+                 \PY{k}{return} \PY{n}{g}
+             
+             \PY{k}{def} \PY{n+nf}{show}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{title}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{g} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{nx}\PY{p}{(}\PY{p}{)}
+                 \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+                 \PY{n}{pos} \PY{o}{=} \PY{n}{nx}\PY{o}{.}\PY{n}{drawing}\PY{o}{.}\PY{n}{nx\PYZus{}agraph}\PY{o}{.}\PY{n}{graphviz\PYZus{}layout}\PY{p}{(}\PY{n}{g}\PY{p}{,}\PY{n}{prog}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{dot}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+                 \PY{n}{nodes} \PY{o}{=} \PY{n}{nx}\PY{o}{.}\PY{n}{draw\PYZus{}networkx\PYZus{}nodes}\PY{p}{(}\PY{n}{g}\PY{p}{,} \PY{n}{pos}\PY{o}{=}\PY{n}{pos}\PY{p}{,} \PY{n}{node\PYZus{}size}\PY{o}{=}\PY{l+m+mi}{100}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.2}\PY{p}{)}
+                 \PY{n}{edges} \PY{o}{=} \PY{n}{nx}\PY{o}{.}\PY{n}{draw\PYZus{}networkx\PYZus{}edges}\PY{p}{(}\PY{n}{g}\PY{p}{,} \PY{n}{pos}\PY{o}{=}\PY{n}{pos}\PY{p}{)}
+                 \PY{n}{labels} \PY{o}{=} \PY{n}{nx}\PY{o}{.}\PY{n}{draw\PYZus{}networkx\PYZus{}labels}\PY{p}{(}\PY{n}{g}\PY{p}{,} \PY{n}{pos}\PY{o}{=}\PY{n}{pos}\PY{p}{,} \PY{n}{font\PYZus{}size}\PY{o}{=}\PY{l+m+mi}{6}\PY{p}{)}
+                 \PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{off}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+                 \PY{k}{if} \PY{n}{title}\PY{p}{:}
+                     \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{n}{title}\PY{p}{)}
+                 \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+                 
          \PY{n}{root} \PY{o}{=} \PY{n}{Node}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MAX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
          
          \PY{n}{root}\PY{o}{.}\PY{n}{left} \PY{o}{=} \PY{n}{Node}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MIN}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
@@ -355,9 +409,12 @@ pruned during the search, and the values for \texttt{MAX} and
          \PY{n}{root}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{left}\PY{o}{.}\PY{n}{left} \PY{o}{=} \PY{n}{Node}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MAX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{value}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{)}
          \PY{n}{root}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{left}\PY{o}{.}\PY{n}{right} \PY{o}{=} \PY{n}{Node}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MAX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{value}\PY{o}{=}\PY{l+m+mi}{14}\PY{p}{)}
          
-         \PY{n+nb}{print}\PY{p}{(}\PY{n}{root}\PY{p}{)}
+         \PY{n}{root}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{n}{title}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Initial}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         
+         \PY{n}{i} \PY{o}{=} \PY{l+m+mi}{0}
          
          \PY{k}{def} \PY{n+nf}{alpha\PYZus{}beta\PYZus{}pruning}\PY{p}{(}\PY{n}{root}\PY{p}{,} \PY{n}{depth}\PY{p}{,} \PY{n}{player}\PY{p}{,} \PY{n}{alpha}\PY{p}{,} \PY{n}{beta}\PY{p}{)}\PY{p}{:}
+             \PY{k}{global} \PY{n}{i}
              \PY{k}{if} \PY{n}{depth} \PY{o}{==} \PY{l+m+mi}{0} \PY{o+ow}{or} \PY{n}{root}\PY{o}{.}\PY{n}{is\PYZus{}empty}\PY{p}{:}
                  \PY{k}{return} \PY{n}{root}\PY{o}{.}\PY{n}{value}
              \PY{k}{if} \PY{n}{player} \PY{o}{==} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MAX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}
@@ -374,7 +431,8 @@ pruned during the search, and the values for \texttt{MAX} and
                          \PY{n}{root}\PY{o}{.}\PY{n}{alpha} \PY{o}{=} \PY{n}{alpha}
                          \PY{k}{if} \PY{n}{beta} \PY{o}{\PYZlt{}}\PY{o}{=} \PY{n}{alpha}\PY{p}{:}
                              \PY{n}{pruned} \PY{o}{=} \PY{k+kc}{True}
-                 \PY{n+nb}{print}\PY{p}{(}\PY{n}{root}\PY{p}{)}
+                 \PY{n}{i} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
+                 \PY{n}{root}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{n}{title}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Step }\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{i}\PY{p}{)}\PY{p}{)}
                  \PY{k}{return} \PY{n}{best}
              \PY{k}{else}\PY{p}{:}
                  \PY{n}{best} \PY{o}{=} \PY{n}{inf}
@@ -390,34 +448,92 @@ pruned during the search, and the values for \texttt{MAX} and
                          \PY{n}{root}\PY{o}{.}\PY{n}{beta} \PY{o}{=} \PY{n}{beta}
                          \PY{k}{if} \PY{n}{beta} \PY{o}{\PYZlt{}}\PY{o}{=} \PY{n}{alpha}\PY{p}{:}
                              \PY{n}{pruned} \PY{o}{=} \PY{k+kc}{True}
-                 \PY{n+nb}{print}\PY{p}{(}\PY{n}{root}\PY{p}{)}
+                 \PY{n}{i} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
+                 \PY{n}{root}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{n}{title}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Step }\PY{l+s+si}{\PYZob{}\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{o}{.}\PY{n}{format}\PY{p}{(}\PY{n}{i}\PY{p}{)}\PY{p}{)}
                  \PY{k}{return} \PY{n}{best}
          \PY{n}{alpha\PYZus{}beta\PYZus{}pruning}\PY{p}{(}\PY{n}{root}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MAX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{n}{inf}\PY{p}{,} \PY{n}{inf}\PY{p}{)}
 \end{Verbatim}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-[-inf - inf] - <(-inf - inf) - <[-inf - inf] - <(-inf - inf) - <[-inf - inf], [-inf - inf]>, (-inf - inf) - <[-inf - inf], [-inf - inf]>>, [-inf - inf] - <(-inf - inf) - <[-inf - inf]>, (-inf - inf) - <[-inf - inf], [-inf - inf]>>>, (-inf - inf) - <[-inf - inf] - <(-inf - inf) - <[-inf - inf], [-inf - inf]>, (-inf - inf) - <[-inf - inf]>>, [-inf - inf] - <(-inf - inf) - <[-inf - inf], [-inf - inf]>>>>
-(-inf - 5) - <[-inf - inf], [-inf - inf]>
-(-inf - 5) - <[-inf - inf], [-inf - inf]>
-[5 - inf] - <(-inf - 5) - <[-inf - inf], [-inf - inf]>, (-inf - 5) - <[-inf - inf], [-inf - inf]>>
-(-inf - 4) - <[-inf - inf]>
-(-inf - 0) - <[-inf - inf], >
-[4 - inf] - <(-inf - 4) - <[-inf - inf]>, (-inf - 0) - <[-inf - inf], >>
-(-inf - 4) - <[5 - inf] - <(-inf - 5) - <[-inf - inf], [-inf - inf]>, (-inf - 5) - <[-inf - inf], [-inf - inf]>>, [4 - inf] - <(-inf - 4) - <[-inf - inf]>, (-inf - 0) - <[-inf - inf], >>>
-(-inf - 5) - <[-inf - inf], [-inf - inf]>
-(-inf - 3) - <[-inf - inf]>
-[5 - inf] - <(-inf - 5) - <[-inf - inf], [-inf - inf]>, (-inf - 3) - <[-inf - inf]>>
-(-inf - 2) - <[-inf - inf], >
-[4 - inf] - <(-inf - 2) - <[-inf - inf], >>
-(-inf - 2) - <[5 - inf] - <(-inf - 5) - <[-inf - inf], [-inf - inf]>, (-inf - 3) - <[-inf - inf]>>, [4 - inf] - <(-inf - 2) - <[-inf - inf], >>>
-[4 - inf] - <(-inf - 4) - <[5 - inf] - <(-inf - 5) - <[-inf - inf], [-inf - inf]>, (-inf - 5) - <[-inf - inf], [-inf - inf]>>, [4 - inf] - <(-inf - 4) - <[-inf - inf]>, (-inf - 0) - <[-inf - inf], >>>, (-inf - 2) - <[5 - inf] - <(-inf - 5) - <[-inf - inf], [-inf - inf]>, (-inf - 3) - <[-inf - inf]>>, [4 - inf] - <(-inf - 2) - <[-inf - inf], >>>>
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_2.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_3.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_4.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_5.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_6.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_7.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_8.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_9.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_10.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_11.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_12.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_13.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_14.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    \texttt{\color{outcolor}Out[{\color{outcolor}83}]:}
+    
+    \[4\]
 
-    \end{Verbatim}
+    
 
-            \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}45}]:} 4
-\end{Verbatim}
-        
     \section{Problem 2}\label{problem-2}
 
 \textbf{Show that the following assertion is true using an example: For
@@ -486,13 +602,13 @@ root of the tree only has one child.}
 \texttt{\color{outcolor}Out[{\color{outcolor}4}]:}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_6_0.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_7_0.png}
     \end{center}
     { \hspace*{\fill} \\}
     
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}50}]:} \PY{n}{inf} \PY{o}{=} \PY{l+m+mi}{1}\PY{n}{e12}
+{\color{incolor}In [{\color{incolor}87}]:} \PY{n}{names} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{A}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
          
          \PY{n}{root} \PY{o}{=} \PY{n}{Node}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MAX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
          
@@ -514,9 +630,12 @@ root of the tree only has one child.}
          \PY{n}{root}\PY{o}{.}\PY{n}{left}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{left} \PY{o}{=} \PY{n}{Node}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MAX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{value}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
          \PY{n}{root}\PY{o}{.}\PY{n}{left}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{right}\PY{o}{.}\PY{n}{right} \PY{o}{=} \PY{n}{Node}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MAX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{value}\PY{o}{=}\PY{l+m+mi}{5}\PY{p}{)}
          
-         \PY{n+nb}{print}\PY{p}{(}\PY{n}{root}\PY{p}{)}
+         \PY{n}{root}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{n}{title}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{initial}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         
+         \PY{n}{step} \PY{o}{=} \PY{l+m+mi}{1}
          
          \PY{k}{def} \PY{n+nf}{alpha\PYZus{}beta\PYZus{}pruning}\PY{p}{(}\PY{n}{root}\PY{p}{,} \PY{n}{depth}\PY{p}{,} \PY{n}{player}\PY{p}{)}\PY{p}{:}
+             \PY{k}{global} \PY{n}{step}
              \PY{k}{if} \PY{n}{depth} \PY{o}{==} \PY{l+m+mi}{0} \PY{o+ow}{or} \PY{n}{root}\PY{o}{.}\PY{n}{is\PYZus{}empty}\PY{p}{:}
                  \PY{k}{return} \PY{n}{root}\PY{o}{.}\PY{n}{value}
              \PY{k}{if} \PY{n}{player} \PY{o}{==} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MAX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}
@@ -536,29 +655,34 @@ root of the tree only has one child.}
          \PY{n}{alpha\PYZus{}beta\PYZus{}pruning}\PY{p}{(}\PY{n}{root}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MAX}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 \end{Verbatim}
 
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{Will Farmer - Homework 4_files/Will Farmer - Homework 4_8_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
     \begin{Verbatim}[commandchars=\\\{\}]
-[-inf - inf] - <(-inf - inf) - <[-inf - inf] - <(-inf - inf) - <[-inf - inf], [-inf - inf]>, (-inf - inf) - <[-inf - inf], [-inf - inf]>>, [-inf - inf] - <(-inf - inf) - <[-inf - inf]>, (-inf - inf) - <[-inf - inf], [-inf - inf]>>>>
 5
 10
-1000000000000.0
+inf
 6
 5
-1000000000000.0
-1000000000000.0
+inf
+inf
 4
-1000000000000.0
+inf
 0
 5
-1000000000000.0
-1000000000000.0
-1000000000000.0
+inf
+inf
+inf
 
     \end{Verbatim}
+\texttt{\color{outcolor}Out[{\color{outcolor}87}]:}
+    
+    \[inf\]
 
-            \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}50}]:} 1000000000000.0
-\end{Verbatim}
-        
+    
+
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor} }]:} 
 \end{Verbatim}

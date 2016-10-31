@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Arch Linux) (preloaded format=pdflatex 2016.8.17)  23 SEP 2016 14:55
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Arch Linux) (preloaded format=pdflatex 2016.8.17)  31 OCT 2016 13:45
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -688,75 +688,318 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 LaTeX Warning: No \author given.
 
-LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <14.4> not available
-(Font)              Font shape `T1/ppl/b/n' tried instead on input line 278.
-LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <10.95> not available
-(Font)              Font shape `T1/ppl/b/n' tried instead on input line 283.
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 283.
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 278.
 (/usr/share/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <10.95> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 283.
-LaTeX Font Info:    Try loading font information for TS1+pcr on input line 287.
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 279.
+LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <14.4> not available
+(Font)              Font shape `T1/ppl/b/n' tried instead on input line 289.
+LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <10.95> not available
+(Font)              Font shape `T1/ppl/b/n' tried instead on input line 294.
+LaTeX Font Info:    Try loading font information for TS1+pcr on input line 298.
 
 
 (/usr/share/texmf-dist/tex/latex/psnfss/ts1pcr.fd
 File: ts1pcr.fd 2001/06/04 font definitions for TS1/pcr.
 )
-<Will Farmer - Homework 4_files/Will Farmer - Homework 4_1_0.png, id=16, 1471.4
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_2_0.png, id=16, 1471.4
 975pt x 587.19376pt>
-File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_1_0.png Graphic f
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_2_0.png Graphic f
 ile (type png)
 
-<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_1_0.png>
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_2_0.png>
 Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
-4_1_0.png used on input line 292.
+4_2_0.png used on input line 303.
 (pdftex.def)             Requested size: 1471.49393pt x 587.19232pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 294--295
+Underfull \hbox (badness 10000) in paragraph at lines 305--306
 
  []
 
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./Will Farmer - Homework 4
-_files/Will Farmer - Homework 4_1_0.png>] [2] [3] [4]
-<Will Farmer - Homework 4_files/Will Farmer - Homework 4_6_0.png, id=43, 855.19
-5pt x 625.33624pt>
-File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_6_0.png Graphic f
+_files/Will Farmer - Homework 4_2_0.png>] [2] [3] [4]
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_0.png, id=40, 388.08
+99pt x 267.399pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_0.png Graphic f
 ile (type png)
 
-<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_6_0.png>
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_0.png>
 Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
-4_6_0.png used on input line 489.
-(pdftex.def)             Requested size: 855.19293pt x 625.33472pt.
+4_3_0.png used on input line 458.
+(pdftex.def)             Requested size: 388.08894pt x 267.39835pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 491--492
+Underfull \hbox (badness 10000) in paragraph at lines 460--461
 
  []
 
-[5 <./Will Farmer - Homework 4_files/Will Farmer - Homework 4_6_0.png>]
-[6]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 571.
- [7]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 571.
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_1.png, id=42, 383.03
+1pt x 267.399pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_1.png Graphic f
+ile (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_1.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_1.png used on input line 463.
+(pdftex.def)             Requested size: 383.03006pt x 267.39835pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 465--466
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_2.png, id=43, 383.03
+1pt x 267.399pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_2.png Graphic f
+ile (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_2.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_2.png used on input line 468.
+(pdftex.def)             Requested size: 383.03006pt x 267.39835pt.
+ [5 <./Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_0.png> <./Will
+ Farmer - Homework 4_files/Will Farmer - Homework 4_3_1.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 470--471
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_3.png, id=50, 383.03
+1pt x 267.399pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_3.png Graphic f
+ile (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_3.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_3.png used on input line 473.
+(pdftex.def)             Requested size: 383.03006pt x 267.39835pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 475--476
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_4.png, id=51, 387.36
+72pt x 280.4076pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_4.png Graphic f
+ile (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_4.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_4.png used on input line 478.
+(pdftex.def)             Requested size: 387.36626pt x 280.4069pt.
+ [6 <./Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_2.png> <./Will
+ Farmer - Homework 4_files/Will Farmer - Homework 4_3_3.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 480--481
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_5.png, id=58, 387.36
+72pt x 280.4076pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_5.png Graphic f
+ile (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_5.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_5.png used on input line 483.
+(pdftex.def)             Requested size: 387.36626pt x 280.4069pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 485--486
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_6.png, id=59, 383.03
+1pt x 267.399pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_6.png Graphic f
+ile (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_6.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_6.png used on input line 488.
+(pdftex.def)             Requested size: 383.03006pt x 267.39835pt.
+ [7 <./Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_4.png> <./Will
+ Farmer - Homework 4_files/Will Farmer - Homework 4_3_5.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 490--491
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_7.png, id=67, 375.08
+13pt x 267.399pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_7.png Graphic f
+ile (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_7.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_7.png used on input line 493.
+(pdftex.def)             Requested size: 375.08038pt x 267.39835pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 495--496
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_8.png, id=68, 383.03
+1pt x 267.399pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_8.png Graphic f
+ile (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_8.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_8.png used on input line 498.
+(pdftex.def)             Requested size: 383.03006pt x 267.39835pt.
+ [8 <./Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_6.png> <./Will
+ Farmer - Homework 4_files/Will Farmer - Homework 4_3_7.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 500--501
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_9.png, id=75, 387.36
+72pt x 280.4076pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_9.png Graphic f
+ile (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_9.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_9.png used on input line 503.
+(pdftex.def)             Requested size: 387.36626pt x 280.4069pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 505--506
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_10.png, id=76, 383.0
+31pt x 267.399pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_10.png Graphic 
+file (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_10.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_10.png used on input line 508.
+(pdftex.def)             Requested size: 383.03006pt x 267.39835pt.
+ [9 <./Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_8.png> <./Will
+ Farmer - Homework 4_files/Will Farmer - Homework 4_3_9.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 510--511
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_11.png, id=83, 387.3
+672pt x 280.4076pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_11.png Graphic 
+file (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_11.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_11.png used on input line 513.
+(pdftex.def)             Requested size: 387.36626pt x 280.4069pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 515--516
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_12.png, id=84, 387.3
+672pt x 280.4076pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_12.png Graphic 
+file (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_12.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_12.png used on input line 518.
+(pdftex.def)             Requested size: 387.36626pt x 280.4069pt.
+ [10 <./Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_10.png> <./Wi
+ll Farmer - Homework 4_files/Will Farmer - Homework 4_3_11.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 520--521
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_13.png, id=91, 384.4
+764pt x 267.399pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_13.png Graphic 
+file (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_13.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_13.png used on input line 523.
+(pdftex.def)             Requested size: 384.47545pt x 267.39835pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 525--526
+
+ []
+
+
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_14.png, id=92, 388.0
+899pt x 267.399pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_14.png Graphic 
+file (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_14.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_3_14.png used on input line 528.
+(pdftex.def)             Requested size: 388.08894pt x 267.39835pt.
+ [11 <./Will Farmer - Homework 4_files/Will Farmer - Homework 4_3_12.png> <./Wi
+ll Farmer - Homework 4_files/Will Farmer - Homework 4_3_13.png>] [12 <./Will Fa
+rmer - Homework 4_files/Will Farmer - Homework 4_3_14.png>]
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_7_0.png, id=107, 855.1
+95pt x 625.33624pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_7_0.png Graphic f
+ile (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_7_0.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_7_0.png used on input line 605.
+(pdftex.def)             Requested size: 855.19293pt x 625.33472pt.
+ [13]
+Underfull \hbox (badness 10000) in paragraph at lines 607--608
+
+ []
+
+[14 <./Will Farmer - Homework 4_files/Will Farmer - Homework 4_7_0.png>]
+<Will Farmer - Homework 4_files/Will Farmer - Homework 4_8_0.png, id=117, 388.0
+899pt x 267.399pt>
+File: Will Farmer - Homework 4_files/Will Farmer - Homework 4_8_0.png Graphic f
+ile (type png)
+
+<use Will Farmer - Homework 4_files/Will Farmer - Homework 4_8_0.png>
+Package pdftex.def Info: Will Farmer - Homework 4_files/Will Farmer - Homework 
+4_8_0.png used on input line 659.
+(pdftex.def)             Requested size: 388.08894pt x 267.39835pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 661--662
+
+ []
+
+[15 <./Will Farmer - Homework 4_files/Will Farmer - Homework 4_8_0.png>]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 695.
+
+[16]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 695.
  (./Will Farmer - Homework 4.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 571.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 571.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 695.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 695.
 Package rerunfilecheck Info: File `"Will Farmer - Homework 4".out' has not chan
 ged.
 (rerunfilecheck)             Checksum: 1CD3581CFC13DBF42D20EBCA254D4CCB;132.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 571.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 695.
  ) 
 Here is how much of TeX's memory you used:
- 10512 strings out of 493013
- 155315 string characters out of 6139317
- 265098 words of memory out of 5000000
- 13840 multiletter control sequences out of 15000+600000
+ 10585 strings out of 493013
+ 159796 string characters out of 6139317
+ 265100 words of memory out of 5000000
+ 13904 multiletter control sequences out of 15000+600000
  20890 words of font info for 56 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 36i,6n,38p,621b,461s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 36i,6n,38p,614b,463s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-dist/fon
 ts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/publi
 c/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/c
@@ -765,10 +1008,10 @@ hare/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dis
 t/fonts/type1/urw/courier/ucrb8a.pfb></usr/share/texmf-dist/fonts/type1/urw/cou
 rier/ucrr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/palatino/uplb8a.pfb></us
 r/share/texmf-dist/fonts/type1/urw/palatino/uplr8a.pfb>
-Output written on "Will Farmer - Homework 4.pdf" (7 pages, 308744 bytes).
+Output written on "Will Farmer - Homework 4.pdf" (16 pages, 605478 bytes).
 PDF statistics:
- 93 PDF objects out of 1000 (max. 8388607)
- 72 compressed objects within 1 object stream
- 11 named destinations out of 1000 (max. 500000)
- 35 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 166 PDF objects out of 1000 (max. 8388607)
+ 103 compressed objects within 2 object streams
+ 20 named destinations out of 1000 (max. 500000)
+ 115 words of extra memory for PDF output out of 10000 (max. 10000000)
 
