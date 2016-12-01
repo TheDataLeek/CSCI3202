@@ -43,17 +43,10 @@ def predict(sentence, states, transitions, emissions):
                     max_prob = max_trans_prob * emissions[sentence[t]][state]
                     V[t][state] = {'prob': max_prob, 'prev': prev_state}
                     break
-    path = []
-    max_prob = max(v['prob'] for _, v in V[-1].items())
-    prev = None
-    for state, data in V[-1].items():
-        if data['prob'] == max_prob:
-            path.append(state)
-            prev = state
-            break
-    for t in range(len(V) - 2, -1, -1):
-        path.insert(0, V[t + 1][prev]['prev'])
-        prev = V[t + 1][prev]['prev']
+
+    path = [max(item,
+                key=lambda k: item[k]['prob'])
+            for item in V]
 
     print_sentence(sentence, path)
 
@@ -87,18 +80,15 @@ def get_tags():
     # Get our data
     data = list(rows())
 
-    # first let's get the count of each tag and each word
+    # first let's get each word and the count of each tag
     tags = {}
-    words = {}
+    words = set()
     for word, tag in data:
         if tag in tags:
             tags[tag] += 1
         else:
             tags[tag] = 1
-        if word in words:
-            words[word] += 1
-        else:
-            words[word] = 1
+        words.add(word)
 
     # Now let's get the transition probabilities
     transitions = {'{}->{}'.format(t0, t1): 0
@@ -106,13 +96,19 @@ def get_tags():
                    for t1 in tags}
     for i in range(len(data) - 1):
         tag0, tag1 = data[i][1], data[i + 1][1]
-        key = '{}->{}'.format(tag1, tag0)
+        key = '{}->{}'.format(tag0, tag1)
         transitions[key] += 1 / tags[tag0]
+
+    # Test gainst provided thing
+    assert((transitions['NN->DT'] * tags['NN'] - 870) < 1)
 
     # Now let's get the word & tag associations
     emissions = {w:{t:0 for t in tags} for w in words}
     for word, tag in data:
         emissions[word][tag] += 1 / tags[tag]
+
+    # Moar tests
+    assert((emissions['the']['DT'] * tags['DT'] - 39517) < 1)
 
     return tags, words, transitions, emissions
 
@@ -127,8 +123,8 @@ def rows():
             if len(row) > 0:
                 yield row
             else:
-                yield start
                 yield end
+                yield start
     yield end
 
 
