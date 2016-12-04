@@ -24,34 +24,57 @@ def predict(sentence, states, transitions, emissions):
 
     Assuming initial prob = 1 since starts with `>>>`
     """
+    # Initialize empty states
     V = [{} for _ in sentence]
+
+    # Set the first state probability to the emission probability of that word
+    # for each tag it *might* be
     V[0] = {state: {'prob': emissions[sentence[0]][state],
                     'prev': None}
             for state in states}
 
+    # Easy lambdas to index our dictionary
     tkey = lambda t0, t1: '{}->{}'.format(t0, t1)
+    trans_prob = lambda t0, t1: transitions[tkey(t0, t1)]
 
+    # Iterate over each word (not including first, we've already done that)
     for t in range(1, len(sentence)):
+        # For each possible state that it might be
         for state in states:
-            max_trans_prob = max(V[t - 1][prev_state]['prob'] *
-                                 transitions[tkey(prev_state, state)]
-                                 for prev_state in states)
-            for prev_state in states:
-                prob = (V[t - 1][prev_state]['prob'] *
-                        transitions[tkey(prev_state, state)])
-                if (prob == max_trans_prob):
-                    max_prob = max_trans_prob * emissions[sentence[t]][state]
-                    V[t][state] = {'prob': max_prob, 'prev': prev_state}
-                    break
+            # Determine the transition probabilities for the previous state to
+            # the current one.
+            trans_probs = [V[t - 1][prev_state]['prob'] *
+                                 trans_prob(prev_state, state)
+                                 for prev_state in states]
+            # Determine the max transition probability
+            max_trans_prob = max(trans_probs)
+            # Determine its argmax to find the state
+            max_state = states[argmax(trans_probs)]
+            # Set our current prob to be this maxval * emission prob and set
+            # previous to the previous state
+            V[t][state] = {'prob': max_trans_prob *
+                                    emissions[sentence[t]][state],
+                           'prev': max_state}
 
+    # Now to find the path back it's simple, just find the max values at each
+    # step.
     path = [max(item,
                 key=lambda k: item[k]['prob'])
             for item in V]
 
+    # Print it special
     print_sentence(sentence, path)
 
 
+def argmax(array):
+    maxval = max(array)
+    for i, a in enumerate(array):
+        if a == maxval:
+            return i
+
+
 def print_sentence(sentence, path):
+    """This is just a nice formatter"""
     spaces = [(l - len(w), l - len(t))
               for w, t, l in zip(sentence, path,
                   [max(len(w), len(t))
