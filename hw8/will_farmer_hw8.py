@@ -147,6 +147,9 @@ def get_args():
         args.sentence = args.sentence[:-5]
     if not args.sentence.startswith('>>>'):
         args.sentence = '>>> {} <<<'.format(args.sentence)
+    args.sentence = ''.join(x if x not in [',', '.', '?', '!']
+                                else ' ' + x
+                            for x in args.sentence)
     args.sentence = args.sentence.split(' ')
 
     # I'm a naughty boy
